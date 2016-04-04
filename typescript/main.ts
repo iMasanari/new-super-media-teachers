@@ -5,6 +5,7 @@
 /// <reference path="CharaControler.ts" />
 /// <reference path="Player.ts" />
 /// <reference path="OtherPlayer.ts" />
+/// <reference path="Enemy.ts" />
 
 let animationFrame = (function(): (callback) => void {
     let list = [
@@ -13,7 +14,7 @@ let animationFrame = (function(): (callback) => void {
         'mozRequestAnimationFrame'
     ];
 
-    for (let val of list) if (window[val]) {
+    for (let i = 0, val: string; val = list[i]; ++i) if (window[val]) {
         return function(callback) {
             window[val](callback.bind(this));
         };
@@ -44,12 +45,14 @@ img.src = 'sprite.png';
 
 let player: Player;
 let otherPlayers: OtherPlayerBuilder;
+let enemys: EnemyBuilder;
 
 function init() {
     player = new Player(teacheresSprite, display);
     player.control.setInputHandeler(player, socket, document.getElementById('touch-keyboard'));
 
     otherPlayers = new OtherPlayerBuilder(teacheresSprite, display);
+    enemys = new EnemyBuilder(teacheresSprite, display);
 }
 
 function run() {
@@ -61,18 +64,16 @@ function run() {
 function update() {
     ++display.frame;
     display.clear();
-    player.move();
+    
+    otherPlayers.update();
     player.update();
-    otherPlayers.each(function(chara) {
-        chara.move();
-        chara.update();
-    });
+    
+    enemys.update(player);
 }
 function render() {
-    otherPlayers.each(function(chara) {
-        chara.display();
-    });
+    otherPlayers.display();
     player.display();
+    enemys.display();
 }
 
 socket.on('update', function(data: socketData) {
@@ -89,6 +90,9 @@ socket.on('inputEnd', function(data: socketData) {
 
     chara.control.inputEnd(data.keyCode);
     chara.sync(data.position);
+});
+socket.on('addEnemy', function() {
+        enemys.add();
 });
 socket.on('request-update', function(data) {
     socket.emit('update', {

@@ -16,6 +16,7 @@ class Player extends Chara {
         }
     }
     update() {
+        this.move();
         this.setPosition();
         this.updateSprite();
     }

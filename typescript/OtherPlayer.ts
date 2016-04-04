@@ -9,8 +9,10 @@ class OtherPlayer extends Player {
     };
 
     update() {
+        this.move();
         this.setPosition();
         this.setPosition(this._position);
+
         // 通信ラグによるズレを補正
         for (let key in this.position) {
             let difference = (this._position[key] - this.position[key]) / 2;
@@ -49,18 +51,13 @@ class OtherPlayer extends Player {
 }
 
 class OtherPlayerBuilder {
-    players: {[x: string]: OtherPlayer} = {};
-    
-    constructor(public sprites: Sprite[], public screen: Screens) {}
-    
-    each(func: (player: OtherPlayer) => void) {
-        for (let id in this.players) {
-            func(this.players[id]);
-        }
-    }
+    players: { [x: string]: OtherPlayer } = {};
+
+    constructor(public sprites: Sprite[], public screen: Screens) { }
+
     getPlayer(id: string) {
         let chara = this.players[id];
-        
+
         if (!chara) {
             return this.players[id] = new OtherPlayer(this.sprites, this.screen);
         }
@@ -69,5 +66,15 @@ class OtherPlayerBuilder {
     remove(id: string) {
         this.players[id] = null;
         delete this.players[id];
+    }
+    update() {
+        for (let id in this.players) {
+            this.players[id].update();
+        }
+    }
+    display() {
+        for (let id in this.players) {
+            this.players[id].display();
+        }
     }
 }

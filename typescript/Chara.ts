@@ -12,12 +12,16 @@ class Chara {
         sy: 0
     };
     
+    width: number;
+    height: number;
     screenLeft: number;
     screenBottom: number;
 
     constructor(public sprites: Sprite[], public screen: Screens) {
-        this.screenLeft = screen.width - sprites[0].width;
-        this.screenBottom = screen.height - sprites[0].height;
+        this.width = sprites[0].width;
+        this.height = sprites[0].height;
+        this.screenLeft = screen.width - this.width;
+        this.screenBottom = screen.height - this.height;
     }
     update(){}
     display() {

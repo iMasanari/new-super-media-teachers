@@ -46,7 +46,7 @@ var CharaControler = (function () {
             return;
         this.down[code] = true;
         this._down[code] = true;
-        window.setTimeout(function () {
+        this.timerId = window.setTimeout(function () {
             _this._down[code] = undefined;
         }, 1000);
     };
@@ -54,6 +54,7 @@ var CharaControler = (function () {
         var code = this.getKeyCode(_code);
         this.down[code] = undefined;
         this.pressed[code] = undefined;
+        window.clearTimeout(this.timerId);
     };
     CharaControler.prototype.getKeyCode = function (code) {
         var keyCode = (typeof code === 'number') ?
@@ -150,8 +151,10 @@ var Chara = (function () {
             sx: 0,
             sy: 0
         };
-        this.screenLeft = screen.width - sprites[0].width;
-        this.screenBottom = screen.height - sprites[0].height;
+        this.width = sprites[0].width;
+        this.height = sprites[0].height;
+        this.screenLeft = screen.width - this.width;
+        this.screenBottom = screen.height - this.height;
     }
     Chara.prototype.update = function () { };
     Chara.prototype.display = function () {
@@ -178,6 +181,7 @@ var Player = (function (_super) {
         }
     };
     Player.prototype.update = function () {
+        this.move();
         this.setPosition();
         this.updateSprite();
     };
@@ -228,6 +232,7 @@ var OtherPlayer = (function (_super) {
         };
     }
     OtherPlayer.prototype.update = function () {
+        this.move();
         this.setPosition();
         this.setPosition(this._position);
         for (var key in this.position) {
@@ -271,11 +276,6 @@ var OtherPlayerBuilder = (function () {
         this.screen = screen;
         this.players = {};
     }
-    OtherPlayerBuilder.prototype.each = function (func) {
-        for (var id in this.players) {
-            func(this.players[id]);
-        }
-    };
     OtherPlayerBuilder.prototype.getPlayer = function (id) {
         var chara = this.players[id];
         if (!chara) {
@@ -287,7 +287,79 @@ var OtherPlayerBuilder = (function () {
         this.players[id] = null;
         delete this.players[id];
     };
+    OtherPlayerBuilder.prototype.update = function () {
+        for (var id in this.players) {
+            this.players[id].update();
+        }
+    };
+    OtherPlayerBuilder.prototype.display = function () {
+        for (var id in this.players) {
+            this.players[id].display();
+        }
+    };
     return OtherPlayerBuilder;
+}());
+var Enemy = (function (_super) {
+    __extends(Enemy, _super);
+    function Enemy(sprites, screen) {
+        _super.call(this, sprites, screen);
+        this.position.x = screen.width;
+        this.position.y = this.screenBottom;
+    }
+    Enemy.prototype.update = function () {
+        this.position.x -= 4;
+        this.updateSprite();
+    };
+    Enemy.prototype.updateSprite = function () {
+        if (this.screen.frame % 20 === 0) {
+            this.spriteIndex = this.spriteIndex ? 0 : 1;
+        }
+    };
+    Enemy.prototype.isHit = function (chara) {
+        var a = this.position, b = chara.position;
+        return Math.pow((a.x - b.x), 2) + Math.pow((a.y - b.y), 2) <= Math.pow(60, 2);
+    };
+    Enemy.prototype.isDead = function () {
+        return this.position.x < -this.width;
+    };
+    return Enemy;
+}(Chara));
+var EnemyBuilder = (function () {
+    function EnemyBuilder(sprites, screen) {
+        this.sprites = sprites;
+        this.screen = screen;
+        this.list = [];
+    }
+    EnemyBuilder.prototype.add = function () {
+        this.list.push(new Enemy(this.sprites, this.screen));
+    };
+    EnemyBuilder.prototype.remove = function (n) {
+        this.list.splice(n, 1);
+    };
+    EnemyBuilder.prototype.update = function (player) {
+        for (var i = 0, enemy = void 0; enemy = this.list[i]; ++i) {
+            enemy.update();
+            if (enemy.isHit(player)) {
+                player.position = {
+                    x: 0,
+                    y: 0,
+                    sx: 0,
+                    sy: 0
+                };
+                player.isFly = true;
+                this.list = [];
+            }
+            else if (enemy.isDead()) {
+                this.remove(i--);
+            }
+        }
+    };
+    EnemyBuilder.prototype.display = function () {
+        for (var i = 0, enemy = void 0; enemy = this.list[i]; ++i) {
+            enemy.display();
+        }
+    };
+    return EnemyBuilder;
 }());
 var animationFrame = (function () {
     var list = [
@@ -295,16 +367,15 @@ var animationFrame = (function () {
         'webkitRequestAnimationFrame',
         'mozRequestAnimationFrame'
     ];
-    var _loop_1 = function(val) {
+    var _loop_1 = function(i, val) {
         if (window[val]) {
             return { value: function (callback) {
                 window[val](callback.bind(this));
             } };
         }
     };
-    for (var _i = 0, list_1 = list; _i < list_1.length; _i++) {
-        var val = list_1[_i];
-        var state_1 = _loop_1(val);
+    for (var i = 0, val = void 0; val = list[i]; ++i) {
+        var state_1 = _loop_1(i, val);
         if (typeof state_1 === "object") return state_1.value;
     }
     return function (callback) {
@@ -327,10 +398,12 @@ img.addEventListener('load', function () {
 img.src = 'sprite.png';
 var player;
 var otherPlayers;
+var enemys;
 function init() {
     player = new Player(teacheresSprite, display);
     player.control.setInputHandeler(player, socket, document.getElementById('touch-keyboard'));
     otherPlayers = new OtherPlayerBuilder(teacheresSprite, display);
+    enemys = new EnemyBuilder(teacheresSprite, display);
 }
 function run() {
     update();
@@ -340,18 +413,14 @@ function run() {
 function update() {
     ++display.frame;
     display.clear();
-    player.move();
+    otherPlayers.update();
     player.update();
-    otherPlayers.each(function (chara) {
-        chara.move();
-        chara.update();
-    });
+    enemys.update(player);
 }
 function render() {
-    otherPlayers.each(function (chara) {
-        chara.display();
-    });
+    otherPlayers.display();
     player.display();
+    enemys.display();
 }
 socket.on('update', function (data) {
     otherPlayers.getPlayer(data.id).sync(data.position);
@@ -365,6 +434,9 @@ socket.on('inputEnd', function (data) {
     var chara = otherPlayers.getPlayer(data.id);
     chara.control.inputEnd(data.keyCode);
     chara.sync(data.position);
+});
+socket.on('addEnemy', function () {
+    enemys.add();
 });
 socket.on('request-update', function (data) {
     socket.emit('update', {

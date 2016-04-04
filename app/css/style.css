@@ -2,6 +2,8 @@ html,
 body {
     padding: 0;
     margin: 0;
+    -webkit-user-select: none;
+    /*user-select: none;*/
 }
 
 .canvas {
@@ -15,31 +17,6 @@ body {
     perspective: 500px;*/
 }
 
-.Chara {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 60px;
-    height: 100px;
-    overflow: hidden;
-    transform-style: preserve-3d;
-}
-
-.Chara::before {
-    content: "";
-    position: absolute;
-    width: 180px;
-    height: 100px;
-    
-    background: url(../sprite.png) no-repeat 0 0;
-    animation: chara-anime .4s infinite;
-}
-
-.Chara.isFly::before {
-    transform: translateX(-120px);
-    animation: none;
-}
-
 .touch-keyboard {
     display: table;
     width: 500px;
@@ -49,8 +26,6 @@ body {
     border: 1px solid #ddd;
     border-radius: 5px;
     text-align: center;
-    -webkit-user-select: none;
-    /*user-select: none;*/
 }
 
 /*.button:active,*/
@@ -63,39 +38,4 @@ body {
     display: table-cell;
     height: 100px;
     vertical-align: middle;
-}
-
-.tile {
-    position: absolute;
-    bottom: 0;
-    width: 200%;
-    height: 50px;
-    background-image: linear-gradient(to bottom, #FF9, #FF9 50%, transparent 50%, transparent), linear-gradient(to left, #6CF, #6CF 50%, #FF9 50%, #FF9);
-    background-size: 50px 50px;
-    transform: none;
-    animation: tile-anime 3s linear infinite;
-}
-
-@keyframes chara-anime {
-    0% {
-        transform: none;
-    }
-    49.9% {
-        transform: none;
-    }
-    50% {
-        transform: translateX(-60px);
-    }
-    100% {
-        transform: translateX(-60px);
-    }
-}
-
-@keyframes tile-anime {
-    0% {
-        transform: none;
-    }
-    100% {
-        transform: translateX(-500px);
-    }
 }

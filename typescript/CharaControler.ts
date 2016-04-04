@@ -2,6 +2,8 @@ class CharaControler {
     down: { [x: string]: boolean } = {};
     _down: { [x: string]: boolean } = {};
     pressed: { [x: string]: boolean } = {};
+    
+    private timerId: number;
 
     inputStart(_code: number | TouchEvent | KeyboardEvent) {
         let code = this.getKeyCode(_code);
@@ -10,8 +12,8 @@ class CharaControler {
 
         this.down[code] = true;
         this._down[code] = true;
-
-        window.setTimeout(() => {
+        
+        this.timerId = window.setTimeout(() => {
             this._down[code] = undefined;
         }, 1000);
     }
@@ -20,6 +22,8 @@ class CharaControler {
 
         this.down[code] = undefined;
         this.pressed[code] = undefined;
+        
+        window.clearTimeout(this.timerId);
     }
     getKeyCode(code: number | TouchEvent | KeyboardEvent): number {
         let keyCode = (typeof code === 'number') ?
