@@ -11,7 +11,7 @@ class Chara {
         sx: 0,
         sy: 0
     };
-    
+
     width: number;
     height: number;
     screenLeft: number;
@@ -21,9 +21,9 @@ class Chara {
         this.width = sprites[0].width;
         this.height = sprites[0].height;
         this.screenLeft = screen.width - this.width;
-        this.screenBottom = screen.height - this.height;
+        this.screenBottom = screen.height - this.height - 100;
     }
-    update(){}
+    update() { }
     display() {
         this.screen.drawSprite(this.sprites[this.spriteIndex], this.position.x, this.position.y);
     };
@@ -31,9 +31,9 @@ class Chara {
 
 module Chara {
     export interface Position {
-        x : number,
-        y : number,
-        sx : number,
-        sy : number
+        x: number,
+        y: number,
+        sx: number,
+        sy: number
     }
 }

@@ -2,10 +2,10 @@ class CharaControler {
     down: { [x: string]: boolean } = {};
     _down: { [x: string]: boolean } = {};
     pressed: { [x: string]: boolean } = {};
-    
+
     private timerId: number;
 
-    inputStart(_code: number | TouchEvent | KeyboardEvent) {
+    inputStart(_code: number | KeyboardEvent | TouchEvent) {
         let code = this.getKeyCode(_code);
 
         if (this.down[code]) return;
@@ -13,23 +13,24 @@ class CharaControler {
         this.down[code] = true;
         this._down[code] = true;
         
+        window.clearTimeout(this.timerId);
+
         this.timerId = window.setTimeout(() => {
             this._down[code] = undefined;
         }, 1000);
     }
-    inputEnd(_code: number | TouchEvent | KeyboardEvent) {
+    inputEnd(_code: number | KeyboardEvent | TouchEvent) {
         let code = this.getKeyCode(_code);
 
         this.down[code] = undefined;
         this.pressed[code] = undefined;
-        
-        window.clearTimeout(this.timerId);
     }
-    getKeyCode(code: number | TouchEvent | KeyboardEvent): number {
+    getKeyCode(code: number | KeyboardEvent | TouchEvent): number {
         let keyCode = (typeof code === 'number') ?
             code : (<KeyboardEvent>code).keyCode || +(<any>code).target.dataset.keyCode;
 
         if (keyCode === 32) {
+            // スペースキーを上キーとして扱う
             return 38;
         }
         return keyCode;
@@ -48,21 +49,24 @@ class CharaControler {
         return false;
     }
     setInputHandeler(player: Player, socket, touchKeyboard: HTMLElement) {
-        var touchKeyboardObject = {};
+        // let touchKeyboardObject = {};
 
-        if (touchKeyboard) {
-            var buttons = touchKeyboard.querySelectorAll('[data-key-code]');
-            for (var i = 0, val = void 0; val = buttons[i]; ++i) {
-                touchKeyboardObject[val.dataset['keyCode']] = val;
-            }
-        }
+        // if (touchKeyboard) {
+        //     let buttons = touchKeyboard.querySelectorAll('[data-key-code]');
+        //     for (let i = 0, val: HTMLElement; val = <HTMLElement>buttons[i]; ++i) {
+        //         touchKeyboardObject[val.dataset['keyCode']] = val;
+        //     }
+        // }
         if (socket) {
             socket.emit('add', {
                 position: player.position
             });
         }
-        var inputStart = e => {
-            var keyCode = this.getKeyCode(e);
+        let inputStart = (e: KeyboardEvent | TouchEvent) => {
+            let keyCode = this.getKeyCode(e);
+
+            this.inputStart(keyCode);
+
             if (socket) {
                 socket.emit('inputStart', {
                     keyCode: keyCode,
@@ -72,27 +76,36 @@ class CharaControler {
                     }
                 });
             }
-            if (touchKeyboardObject[keyCode]) {
-                touchKeyboardObject[keyCode].classList.add('js-hover');
+            if ((<HTMLElement>e.target).classList) {
+                (<HTMLElement>e.target).classList.add('js-hover');
             }
+            // if (touchKeyboardObject[keyCode]) {
+            //     touchKeyboardObject[keyCode].classList.add('js-hover');
+            // }
 
-            this.inputStart(e);
         };
-        var inputEnd = e => {
-            var keyCode = this.getKeyCode(e);
+        let inputEnd = (e: KeyboardEvent | TouchEvent) => {
+            let keyCode = this.getKeyCode(e);
+
+            this.inputEnd(keyCode);
+
             if (socket) {
                 socket.emit('inputEnd', {
                     keyCode: keyCode,
                     position: player.position
                 });
             }
-            if (touchKeyboardObject[keyCode]) {
-                touchKeyboardObject[keyCode].classList.remove('js-hover');
+            if ((<HTMLElement>e.target).classList) {
+                (<HTMLElement>e.target).classList.remove('js-hover');
             }
-            this.inputEnd(e);
+            // if (touchKeyboardObject[keyCode]) {
+            //     touchKeyboardObject[keyCode].classList.remove('js-hover');
+            // }
         };
+
         document.addEventListener("keydown", inputStart);
         document.addEventListener("keyup", inputEnd);
+
         if (touchKeyboard) {
             if ('ontouchstart' in window) {
                 touchKeyboard.addEventListener('touchstart', inputStart, false);

@@ -1,9 +1,10 @@
 /// <reference path="Chara.ts" />
+/// <reference path="Player.ts" />
 
 class Enemy extends Chara {
     constructor(sprites: Sprite[], screen: Screens) {
         super(sprites, screen);
-        
+
         this.position.x = screen.width;
         this.position.y = this.screenBottom;
     }
@@ -19,11 +20,11 @@ class Enemy extends Chara {
     isHit(chara: Chara): boolean {
         let a = this.position,
             b = chara.position;
-            
-        return (a.x - b.x) ** 2 + (a.y - b.y) ** 2 <= 60 ** 2;  
+
+        return (a.x - b.x) ** 2 + (a.y - b.y) ** 2 <= 60 ** 2;
     }
     isDead(): boolean {
-        return this.position.x < -this.width;
+        return this.position.x < -this.width; // <- this.position.x + this.width < 0
     }
 }
 
@@ -50,6 +51,12 @@ class EnemyBuilder {
                 }
                 player.isFly = true;
                 this.list = [];
+                
+                if (socket) {
+                    socket.emit('add', {
+                        position: player.position
+                    });
+                }
                 // this.remove(i--);
             } else if (enemy.isDead()) {
                 this.remove(i--);

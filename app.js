@@ -3,10 +3,11 @@
 var mime = require('mime'),
     fs = require('fs'),
     path = require('path'),
+    port = process.env.PORT || 3000,
     app = require('http').createServer(function(req, res) {
         var url = 'app' + req.url.replace(/\/$/, '/index.html');
 
-        console.log('$ ' + url);
+        console.log('> ' + url);
 
         fs.readFile(url, function(err, data) {
             if (err) {
@@ -20,8 +21,7 @@ var mime = require('mime'),
             });
             res.end(data);
         })
-    }),
-    port = process.env.PORT || 3000;
+    });
 
 app.listen(port);
 console.log('Server running at http://localhost:' + port + '/');
@@ -31,7 +31,6 @@ var io = require('socket.io').listen(app);
 io.sockets.on('connection', function(socket) {
     socket.on('add', function(data) {
         data.id = socket.id;
-        // socket.broadcast.emit('request', data);
         socket.broadcast.emit('request-update', data);
     });
     socket.on('update', function(data) {

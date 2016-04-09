@@ -32,6 +32,7 @@ let socket = io.connect();
 
 let teacheresSprite;
 let img = new Image();
+
 img.addEventListener('load', function() {
     teacheresSprite = [
         new Sprite(this, 0, 0, 60, 100),
@@ -53,6 +54,8 @@ function init() {
 
     otherPlayers = new OtherPlayerBuilder(teacheresSprite, display);
     enemys = new EnemyBuilder(teacheresSprite, display);
+
+    setSocketEvent();
 }
 
 function run() {
@@ -64,49 +67,63 @@ function run() {
 function update() {
     ++display.frame;
     display.clear();
-    
+
     otherPlayers.update();
     player.update();
-    
     enemys.update(player);
 }
 function render() {
+    // 地面の描写
+    let ctx = display.ctx,
+        y = display.height - 100;
+
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(display.width, y);
+    ctx.stroke();
+
     otherPlayers.display();
     player.display();
     enemys.display();
 }
 
-socket.on('update', function(data: socketData) {
-    otherPlayers.getPlayer(data.id).sync(data.position);
-});
-socket.on('inputStart', function(data: socketData) {
-    let chara = otherPlayers.getPlayer(data.id);
-
-    chara.control.inputStart(data.keyCode);
-    chara.sync(data.position);
-});
-socket.on('inputEnd', function(data: socketData) {
-    let chara = otherPlayers.getPlayer(data.id);
-
-    chara.control.inputEnd(data.keyCode);
-    chara.sync(data.position);
-});
-socket.on('addEnemy', function() {
-        enemys.add();
-});
-socket.on('request-update', function(data) {
-    socket.emit('update', {
-        position: player.position
+function setSocketEvent() {
+    socket.on('update', function(data: socketData) {
+        otherPlayers.getPlayer(data.id).sync(data.position);
     });
+    socket.on('inputStart', function(data: socketData) {
+        let chara = otherPlayers.getPlayer(data.id);
 
-    let chara = otherPlayers.getPlayer(data.id);
+        chara.control.inputStart(data.keyCode);
+        chara.sync(data.position);
+    });
+    socket.on('inputEnd', function(data: socketData) {
+        let chara = otherPlayers.getPlayer(data.id);
 
-    // chara.control.inputEnd(data.keyCode);
-    chara.sync(data.position);
-});
-socket.on('remove', function(id: string) {
-    otherPlayers.remove(id);
-});
+        chara.control.inputEnd(data.keyCode);
+        chara.sync(data.position);
+    });
+    socket.on('addEnemy', function() {
+        enemys.add();
+    });
+    socket.on('request-update', function(data?: socketData) {
+        socket.emit('update', {
+            position: player.position
+        });
+
+        if (data) {
+            otherPlayers.getPlayer(data.id).sync(data.position);
+        }
+    });
+    socket.on('remove', function(id: string) {
+        otherPlayers.remove(id);
+    });
+}
+
+// iPhoneでスクロール中にアニメーションが止まるので、スクロールさせない等
+document.addEventListener('touchstert', function(e) { e.preventDefault(); });
+document.addEventListener('touchmove', function(e) { e.preventDefault(); });
+document.addEventListener('touchend', function(e) { e.preventDefault(); });
 
 interface socketData {
     id: string,

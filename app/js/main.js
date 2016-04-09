@@ -46,6 +46,7 @@ var CharaControler = (function () {
             return;
         this.down[code] = true;
         this._down[code] = true;
+        window.clearTimeout(this.timerId);
         this.timerId = window.setTimeout(function () {
             _this._down[code] = undefined;
         }, 1000);
@@ -54,7 +55,6 @@ var CharaControler = (function () {
         var code = this.getKeyCode(_code);
         this.down[code] = undefined;
         this.pressed[code] = undefined;
-        window.clearTimeout(this.timerId);
     };
     CharaControler.prototype.getKeyCode = function (code) {
         var keyCode = (typeof code === 'number') ?
@@ -81,13 +81,6 @@ var CharaControler = (function () {
     };
     CharaControler.prototype.setInputHandeler = function (player, socket, touchKeyboard) {
         var _this = this;
-        var touchKeyboardObject = {};
-        if (touchKeyboard) {
-            var buttons = touchKeyboard.querySelectorAll('[data-key-code]');
-            for (var i = 0, val = void 0; val = buttons[i]; ++i) {
-                touchKeyboardObject[val.dataset['keyCode']] = val;
-            }
-        }
         if (socket) {
             socket.emit('add', {
                 position: player.position
@@ -95,6 +88,7 @@ var CharaControler = (function () {
         }
         var inputStart = function (e) {
             var keyCode = _this.getKeyCode(e);
+            _this.inputStart(keyCode);
             if (socket) {
                 socket.emit('inputStart', {
                     keyCode: keyCode,
@@ -103,23 +97,22 @@ var CharaControler = (function () {
                     }
                 });
             }
-            if (touchKeyboardObject[keyCode]) {
-                touchKeyboardObject[keyCode].classList.add('js-hover');
+            if (e.target.classList) {
+                e.target.classList.add('js-hover');
             }
-            _this.inputStart(e);
         };
         var inputEnd = function (e) {
             var keyCode = _this.getKeyCode(e);
+            _this.inputEnd(keyCode);
             if (socket) {
                 socket.emit('inputEnd', {
                     keyCode: keyCode,
                     position: player.position
                 });
             }
-            if (touchKeyboardObject[keyCode]) {
-                touchKeyboardObject[keyCode].classList.remove('js-hover');
+            if (e.target.classList) {
+                e.target.classList.remove('js-hover');
             }
-            _this.inputEnd(e);
         };
         document.addEventListener("keydown", inputStart);
         document.addEventListener("keyup", inputEnd);
@@ -154,7 +147,7 @@ var Chara = (function () {
         this.width = sprites[0].width;
         this.height = sprites[0].height;
         this.screenLeft = screen.width - this.width;
-        this.screenBottom = screen.height - this.height;
+        this.screenBottom = screen.height - this.height - 100;
     }
     Chara.prototype.update = function () { };
     Chara.prototype.display = function () {
@@ -348,6 +341,11 @@ var EnemyBuilder = (function () {
                 };
                 player.isFly = true;
                 this.list = [];
+                if (socket) {
+                    socket.emit('add', {
+                        position: player.position
+                    });
+                }
             }
             else if (enemy.isDead()) {
                 this.remove(i--);
@@ -404,6 +402,7 @@ function init() {
     player.control.setInputHandeler(player, socket, document.getElementById('touch-keyboard'));
     otherPlayers = new OtherPlayerBuilder(teacheresSprite, display);
     enemys = new EnemyBuilder(teacheresSprite, display);
+    setSocketEvent();
 }
 function run() {
     update();
@@ -418,33 +417,44 @@ function update() {
     enemys.update(player);
 }
 function render() {
+    var ctx = display.ctx, y = display.height - 100;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(display.width, y);
+    ctx.stroke();
     otherPlayers.display();
     player.display();
     enemys.display();
 }
-socket.on('update', function (data) {
-    otherPlayers.getPlayer(data.id).sync(data.position);
-});
-socket.on('inputStart', function (data) {
-    var chara = otherPlayers.getPlayer(data.id);
-    chara.control.inputStart(data.keyCode);
-    chara.sync(data.position);
-});
-socket.on('inputEnd', function (data) {
-    var chara = otherPlayers.getPlayer(data.id);
-    chara.control.inputEnd(data.keyCode);
-    chara.sync(data.position);
-});
-socket.on('addEnemy', function () {
-    enemys.add();
-});
-socket.on('request-update', function (data) {
-    socket.emit('update', {
-        position: player.position
+function setSocketEvent() {
+    socket.on('update', function (data) {
+        otherPlayers.getPlayer(data.id).sync(data.position);
     });
-    var chara = otherPlayers.getPlayer(data.id);
-    chara.sync(data.position);
-});
-socket.on('remove', function (id) {
-    otherPlayers.remove(id);
-});
+    socket.on('inputStart', function (data) {
+        var chara = otherPlayers.getPlayer(data.id);
+        chara.control.inputStart(data.keyCode);
+        chara.sync(data.position);
+    });
+    socket.on('inputEnd', function (data) {
+        var chara = otherPlayers.getPlayer(data.id);
+        chara.control.inputEnd(data.keyCode);
+        chara.sync(data.position);
+    });
+    socket.on('addEnemy', function () {
+        enemys.add();
+    });
+    socket.on('request-update', function (data) {
+        socket.emit('update', {
+            position: player.position
+        });
+        if (data) {
+            otherPlayers.getPlayer(data.id).sync(data.position);
+        }
+    });
+    socket.on('remove', function (id) {
+        otherPlayers.remove(id);
+    });
+}
+document.addEventListener('touchstert', function (e) { e.preventDefault(); });
+document.addEventListener('touchmove', function (e) { e.preventDefault(); });
+document.addEventListener('touchend', function (e) { e.preventDefault(); });

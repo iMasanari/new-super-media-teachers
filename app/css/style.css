@@ -39,3 +39,9 @@ body {
     height: 100px;
     vertical-align: middle;
 }
+
+#stop {
+    margin: 10px;
+    padding: 5px;
+    width: 100px;
+}
