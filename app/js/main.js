@@ -366,7 +366,6 @@ var animationFrame = (function () {
         'mozRequestAnimationFrame'
     ];
     return function (callback) {
-        console.log('use setTimeout');
         return window.setTimeout(callback.bind(this), 1000 / 60);
     };
 })();
