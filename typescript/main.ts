@@ -14,12 +14,13 @@ let animationFrame = (function(): (callback) => void {
         'mozRequestAnimationFrame'
     ];
 
-    for (let i = 0, val: string; val = list[i]; ++i) if (window[val]) {
-        return function(callback) {
-            window[val](callback.bind(this));
-        };
-    }
+    // for (let i = 0, val: string; val = list[i]; ++i) if (window[val]) {
+    //     return function(callback) {
+    //         window[val](callback.bind(this));
+    //     };
+    // }
     return function(callback) {
+        console.log('use setTimeout');
         return window.setTimeout(callback.bind(this), 1000 / 60);
     };
 })();

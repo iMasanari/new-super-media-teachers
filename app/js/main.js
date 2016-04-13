@@ -365,18 +365,8 @@ var animationFrame = (function () {
         'webkitRequestAnimationFrame',
         'mozRequestAnimationFrame'
     ];
-    var _loop_1 = function(i, val) {
-        if (window[val]) {
-            return { value: function (callback) {
-                window[val](callback.bind(this));
-            } };
-        }
-    };
-    for (var i = 0, val = void 0; val = list[i]; ++i) {
-        var state_1 = _loop_1(i, val);
-        if (typeof state_1 === "object") return state_1.value;
-    }
     return function (callback) {
+        console.log('use setTimeout');
         return window.setTimeout(callback.bind(this), 1000 / 60);
     };
 })();
