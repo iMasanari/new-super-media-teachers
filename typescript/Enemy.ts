@@ -91,6 +91,7 @@ class EnemyBuilder {
                     sx: 0,
                     sy: 0
                 };
+                player.maxPoint = Math.max(player.point, player.maxPoint);
                 player.point = 0;
                 player.isFly = true;
                 this.list = [];

@@ -2,6 +2,7 @@
 
 class Player extends Chara {
     point = 0;
+    maxPoint = 0;
     isFly: boolean;
 
     move() {
@@ -28,6 +29,8 @@ class Player extends Chara {
         ctx.font = '50px sans-serif';
         ctx.textAlign = 'right';
         ctx.strokeText(this.point.toFixed(0), 500 - 10, 50);
+        ctx.font = '25px sans-serif';
+        ctx.fillText('MAX: ' + Math.max(this.maxPoint, this.point), 500 - 200, 40);
     }
     setPosition(target = this.position) {
         target.x += target.sx;

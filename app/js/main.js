@@ -170,6 +170,7 @@ var Player = (function (_super) {
     function Player() {
         _super.apply(this, arguments);
         this.point = 0;
+        this.maxPoint = 0;
     }
     Player.prototype.move = function () {
         if (this.control.isDown(37)) {
@@ -194,6 +195,8 @@ var Player = (function (_super) {
         ctx.font = '50px sans-serif';
         ctx.textAlign = 'right';
         ctx.strokeText(this.point.toFixed(0), 500 - 10, 50);
+        ctx.font = '25px sans-serif';
+        ctx.fillText('MAX: ' + Math.max(this.maxPoint, this.point), 500 - 200, 40);
     };
     Player.prototype.setPosition = function (target) {
         if (target === void 0) { target = this.position; }
@@ -389,6 +392,7 @@ var EnemyBuilder = (function () {
                     sx: 0,
                     sy: 0
                 };
+                player.maxPoint = Math.max(player.point, player.maxPoint);
                 player.point = 0;
                 player.isFly = true;
                 this.list = [];
