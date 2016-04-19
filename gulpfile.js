@@ -11,7 +11,9 @@ gulp.task('server', function() {
 gulp.task('typescript', function() {
     gulp.src(['typescript/main.ts'])
         .pipe(typescript({
-            target: "ES5", removeComments: true, out: "main.js"
+            target: "ES5",
+            removeComments: true,
+            out: "main.js"
         }))
         .pipe(gulp.dest('app/js/'));
 });

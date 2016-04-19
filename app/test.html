@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+</head>
+
+<body>
+    <div id="log"></div>
+
+    <!-- scripts -->
+    <script>
+var log = document.getElementById('log');
+
+var animationFrame = (function () {
+    var list = [
+        'requestAnimationFrame',
+        'webkitRequestAnimationFrame',
+        'mozRequestAnimationFrame'
+    ];
+
+    for (var i = 0, val; val = list[i]; ++i) if (window[val]) {
+        return function (callback) {
+            window[val](callback.bind(this));
+        };
+    }
+
+    return function (callback) {
+        log.innerHTML = '計測失敗<br>requestAnimationFrameを使用できませんでした';
+        // window.setTimeout(function() {
+        //     callback(Date.now());
+        // }, 1000 / 60);
+    };
+})();
+
+var time = Date.now(),
+    count = 0,
+    ary = [];
+
+log.innerHTML = '計測中...';
+
+var loop = function (timestamp) {
+    var fps = 1000 / (timestamp - time)
+    ary.push(fps | 0);
+    time = timestamp;
+
+    if (count++ < 100) {
+        animationFrame(loop);
+    } else {
+        log.innerHTML = ary.join('<br>');
+    }
+}
+animationFrame(loop);
+</script>
+</body>
+
+</html>

@@ -12,7 +12,7 @@ class CharaControler {
 
         this.down[code] = true;
         this._down[code] = true;
-        
+
         window.clearTimeout(this.timerId);
 
         this.timerId = window.setTimeout(() => {
@@ -102,10 +102,20 @@ class CharaControler {
             //     touchKeyboardObject[keyCode].classList.remove('js-hover');
             // }
         };
+        let inputReset = () => {
+            this.down = {};
+            this._down = {};
+            this.pressed = {};
+            
+            if (socket) {
+                socket.emit('remove');
+            }
+        }
 
         document.addEventListener("keydown", inputStart);
         document.addEventListener("keyup", inputEnd);
 
+        window.addEventListener('blur', inputReset)
         if (touchKeyboard) {
             if ('ontouchstart' in window) {
                 touchKeyboard.addEventListener('touchstart', inputStart, false);

@@ -114,8 +114,17 @@ var CharaControler = (function () {
                 e.target.classList.remove('js-hover');
             }
         };
+        var inputReset = function () {
+            _this.down = {};
+            _this._down = {};
+            _this.pressed = {};
+            if (socket) {
+                socket.emit('remove');
+            }
+        };
         document.addEventListener("keydown", inputStart);
         document.addEventListener("keyup", inputEnd);
+        window.addEventListener('blur', inputReset);
         if (touchKeyboard) {
             if ('ontouchstart' in window) {
                 touchKeyboard.addEventListener('touchstart', inputStart, false);
@@ -360,13 +369,8 @@ var EnemyBuilder = (function () {
     return EnemyBuilder;
 }());
 var animationFrame = (function () {
-    var list = [
-        'requestAnimationFrame',
-        'webkitRequestAnimationFrame',
-        'mozRequestAnimationFrame'
-    ];
     return function (callback) {
-        return window.setTimeout(callback.bind(this), 1000 / 60);
+        window.setTimeout(callback, 1000 / 60);
     };
 })();
 var display = new Screens(document.getElementById('canvas'), 500, 500);
@@ -393,16 +397,25 @@ function init() {
     enemys = new EnemyBuilder(teacheresSprite, display);
     setSocketEvent();
 }
+var time = new Date().getTime(), fps = 60;
 function run() {
+    var _time = new Date().getTime();
+    fps = 1000 / (_time - time);
+    time = _time;
     update();
     render();
-    animationFrame(run);
+    window.setTimeout(run, 1000 / 60);
 }
+var isPlay = true;
 function update() {
     ++display.frame;
     display.clear();
-    otherPlayers.update();
-    player.update();
+    if (isPlay) {
+        player.update();
+    }
+    else {
+        otherPlayers.update();
+    }
     enemys.update(player);
 }
 function render() {
@@ -411,8 +424,12 @@ function render() {
     ctx.moveTo(0, y);
     ctx.lineTo(display.width, y);
     ctx.stroke();
-    otherPlayers.display();
-    player.display();
+    if (isPlay) {
+        player.display();
+    }
+    else {
+        otherPlayers.display();
+    }
     enemys.display();
 }
 function setSocketEvent() {

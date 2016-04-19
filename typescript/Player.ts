@@ -25,17 +25,17 @@ class Player extends Chara {
         target.sx = Math.min(Math.max(target.sx * (this.isFly ? 0.98 : 0.9), -4), 4);
         target.y += target.sy;
         target.sy += 0.3;
+        
         if (target.x < 0) {
             target.x = 0;
             target.sx *= -1;
-        }
-        else if (this.screenLeft < target.x) {
+        } else if (this.screenLeft < target.x) {
             target.x = this.screenLeft;
             target.sx *= -1;
         }
+        
         if (target.y < 0) {
-        }
-        else if (this.screenBottom < target.y) {
+        } else if (this.screenBottom < target.y) {
             target.y = this.screenBottom;
             target.sy = 0;
             this.isFly = false;
