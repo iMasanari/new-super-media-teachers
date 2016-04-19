@@ -45,3 +45,9 @@ body {
     padding: 5px;
     width: 100px;
 }
+#canvas:-webkit-full-screen {
+    width: auto;
+    height: auto;
+    min-width: 100%;
+    min-height: 100%;
+}

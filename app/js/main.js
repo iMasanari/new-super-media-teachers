@@ -169,6 +169,7 @@ var Player = (function (_super) {
     __extends(Player, _super);
     function Player() {
         _super.apply(this, arguments);
+        this.point = 0;
     }
     Player.prototype.move = function () {
         if (this.control.isDown(37)) {
@@ -186,6 +187,13 @@ var Player = (function (_super) {
         this.move();
         this.setPosition();
         this.updateSprite();
+    };
+    Player.prototype.display = function () {
+        var ctx = this.screen.ctx;
+        _super.prototype.display.call(this);
+        ctx.font = '50px sans-serif';
+        ctx.textAlign = 'right';
+        ctx.strokeText(this.point.toFixed(0), 500 - 10, 50);
     };
     Player.prototype.setPosition = function (target) {
         if (target === void 0) { target = this.position; }
@@ -305,12 +313,45 @@ var Enemy = (function (_super) {
     __extends(Enemy, _super);
     function Enemy(sprites, screen) {
         _super.call(this, sprites, screen);
+        this.isAddedPoint = false;
+        this.point = 50;
+        this.pointPosition = null;
         this.position.x = screen.width;
         this.position.y = this.screenBottom;
     }
     Enemy.prototype.update = function () {
         this.position.x -= 4;
+        this.pointCheck();
         this.updateSprite();
+    };
+    Enemy.prototype.pointCheck = function () {
+        var _this = this;
+        if (!this.isAddedPoint) {
+            if (player.position.x > this.position.x) {
+                var point = this.point * (1 + player.position.x / player.screenLeft) | 0;
+                player.point += point;
+                this.isAddedPoint = true;
+                this.pointPosition = {
+                    point: point,
+                    x: this.position.x + 30,
+                    y: this.position.y - 20,
+                    opacity: 130
+                };
+                window.setTimeout(function () {
+                    _this.pointPosition = null;
+                }, 1000);
+            }
+        }
+        else if (this.pointPosition && this.pointPosition.opacity) {
+            var ctx = this.screen.ctx;
+            ctx.font = '30px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.globalAlpha = this.pointPosition.opacity / 100;
+            this.pointPosition.opacity -= 5;
+            ctx.strokeText('+' + this.pointPosition.point, this.pointPosition.x, this.pointPosition.y);
+            this.pointPosition.y += -3;
+            ctx.globalAlpha = 1;
+        }
     };
     Enemy.prototype.updateSprite = function () {
         if (this.screen.frame % 20 === 0) {
@@ -348,6 +389,7 @@ var EnemyBuilder = (function () {
                     sx: 0,
                     sy: 0
                 };
+                player.point = 0;
                 player.isFly = true;
                 this.list = [];
                 if (socket) {
@@ -464,3 +506,22 @@ function setSocketEvent() {
 document.addEventListener('touchstert', function (e) { e.preventDefault(); });
 document.addEventListener('touchmove', function (e) { e.preventDefault(); });
 document.addEventListener('touchend', function (e) { e.preventDefault(); });
+function ElementRequestFullscreen(element) {
+    var list = [
+        "requestFullscreen",
+        "webkitRequestFullScreen",
+        "mozRequestFullScreen",
+        "msRequestFullscreen"
+    ];
+    for (var i = 0, num = list.length; i < num; i++) {
+        if (element[list[i]]) {
+            element[list[i]]();
+            return true;
+        }
+    }
+    return false;
+}
+document.getElementById('fullscreen').addEventListener('click', function () {
+    var log = ElementRequestFullscreen(document.getElementById('canvas'));
+    console.log(log);
+});

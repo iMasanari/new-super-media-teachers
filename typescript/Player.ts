@@ -1,8 +1,9 @@
 /// <reference path="Chara.ts" />
 
 class Player extends Chara {
+    point = 0;
     isFly: boolean;
-    
+
     move() {
         if (this.control.isDown(37)) {
             this.position.sx -= this.isFly ? 0.1 : 0.4;
@@ -20,12 +21,20 @@ class Player extends Chara {
         this.setPosition();
         this.updateSprite();
     }
+    display() {
+        let ctx = this.screen.ctx;
+
+        super.display();
+        ctx.font = '50px sans-serif';
+        ctx.textAlign = 'right';
+        ctx.strokeText(this.point.toFixed(0), 500 - 10, 50);
+    }
     setPosition(target = this.position) {
         target.x += target.sx;
         target.sx = Math.min(Math.max(target.sx * (this.isFly ? 0.98 : 0.9), -4), 4);
         target.y += target.sy;
         target.sy += 0.3;
-        
+
         if (target.x < 0) {
             target.x = 0;
             target.sx *= -1;
@@ -33,7 +42,7 @@ class Player extends Chara {
             target.x = this.screenLeft;
             target.sx *= -1;
         }
-        
+
         if (target.y < 0) {
         } else if (this.screenBottom < target.y) {
             target.y = this.screenBottom;

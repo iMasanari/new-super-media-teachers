@@ -6,6 +6,7 @@
 /// <reference path="Player.ts" />
 /// <reference path="OtherPlayer.ts" />
 /// <reference path="Enemy.ts" />
+
 let animationFrame = (function (): (callback) => void {
     // let list = [
     //     'requestAnimationFrame',
@@ -147,3 +148,23 @@ interface socketData {
     keyCode: number,
     position: Chara.Position
 }
+function ElementRequestFullscreen(element) {
+    let list = [
+        "requestFullscreen",
+        "webkitRequestFullScreen",
+        "mozRequestFullScreen",
+        "msRequestFullscreen"
+    ];
+    for (let i = 0, num = list.length; i < num; i++) {
+        if (element[list[i]]) {
+            element[list[i]]();
+            return true;
+        }
+    }
+    return false;
+}
+
+document.getElementById('fullscreen').addEventListener('click', function () {
+    let log = ElementRequestFullscreen(document.getElementById('canvas'));
+    console.log(log);
+})
