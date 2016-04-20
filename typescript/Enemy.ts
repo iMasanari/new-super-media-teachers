@@ -62,8 +62,11 @@ class Enemy extends Chara {
         }
     }
     updateSprite() {
-        if (this.screen.frame % 10 === 0) {
-            this.spriteIndex = (this.spriteIndex + 1) % 3;
+        // if (this.screen.frame % 10 === 0) {
+        //     this.spriteIndex = (this.spriteIndex + 1) % 3;
+        // }
+        if (this.screen.frame % 20 === 0) {
+            this.spriteIndex = (this.spriteIndex + 1) % 2;
         }
     }
     isHit(chara: Chara): boolean {

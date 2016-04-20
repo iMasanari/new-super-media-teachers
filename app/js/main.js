@@ -363,8 +363,8 @@ var Enemy = (function (_super) {
         }
     };
     Enemy.prototype.updateSprite = function () {
-        if (this.screen.frame % 10 === 0) {
-            this.spriteIndex = (this.spriteIndex + 1) % 3;
+        if (this.screen.frame % 20 === 0) {
+            this.spriteIndex = (this.spriteIndex + 1) % 2;
         }
     };
     Enemy.prototype.isHit = function (chara) {
@@ -428,11 +428,6 @@ var EnemyBuilder = (function () {
     };
     return EnemyBuilder;
 }());
-var animationFrame = (function () {
-    return function (callback) {
-        window.setTimeout(callback, 1000 / 60);
-    };
-})();
 var display = new Screens(document.getElementById('canvas'), 500, 500);
 var socket = io.connect();
 var teacheresSprite;
@@ -443,11 +438,10 @@ imageLoad('sprite.png', function () {
         new Sprite(this, 60, 0, 60, 100),
         new Sprite(this, 120, 0, 60, 100)
     ];
-    imageLoad('enemy.png', function () {
+    imageLoad('usagi.png', function () {
         enemysSprite = [
-            new Sprite(this, 96 + 14, 0, 96 - 28, 96),
-            new Sprite(this, 96 * 2 + 14, 0, 96 - 28, 96),
-            new Sprite(this, 96 * 3 + 14, 0, 96 - 28, 96)
+            new Sprite(this, 0, 0, 90, 171),
+            new Sprite(this, 90, 0, 90, 171),
         ];
         init();
         run();
@@ -551,6 +545,5 @@ function ElementRequestFullscreen(element) {
     return false;
 }
 document.getElementById('fullscreen').addEventListener('click', function () {
-    var log = ElementRequestFullscreen(document.getElementById('canvas'));
-    console.log(log);
+    ElementRequestFullscreen(document.getElementById('canvas'));
 });

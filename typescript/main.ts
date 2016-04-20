@@ -7,24 +7,6 @@
 /// <reference path="OtherPlayer.ts" />
 /// <reference path="Enemy.ts" />
 
-let animationFrame = (function (): (callback) => void {
-    // let list = [
-    //     'requestAnimationFrame',
-    //     'webkitRequestAnimationFrame',
-    //     'mozRequestAnimationFrame'
-    // ];
-
-    // for (let i = 0, val: string; val = list[i]; ++i) if (window[val]) {
-    //     return function(callback) {
-    //         window[val](callback.bind(this));
-    //     };
-    // }
-
-    return function (callback) {
-        window.setTimeout(callback, 1000 / 60);
-    };
-})();
-
 let display = new Screens(
     <HTMLCanvasElement>document.getElementById('canvas'),
     500, 500
@@ -39,14 +21,23 @@ imageLoad('sprite.png', function () {
         new Sprite(this, 0, 0, 60, 100),
         new Sprite(this, 60, 0, 60, 100),
         new Sprite(this, 120, 0, 60, 100)
+        // new Sprite(this, 0, 0, 60, 104),
+        // new Sprite(this, 60, 0, 60, 104),
+        // new Sprite(this, 120, 0, 60, 104)
     ];
 
-    imageLoad('enemy.png', function () {
+    // imageLoad('enemy.png', function () {
+    //     enemysSprite = [
+    //         // new Sprite(this, 14, 0, 96 - 28, 96),
+    //         new Sprite(this, 96 + 14, 0, 96 - 28, 96),
+    //         new Sprite(this, 96 * 2 + 14, 0, 96 - 28, 96),
+    //         new Sprite(this, 96 * 3 + 14, 0, 96 - 28, 96)
+    //     ];
+    imageLoad('usagi.png', function () {
         enemysSprite = [
-            // new Sprite(this, 14, 0, 96 - 28, 96),
-            new Sprite(this, 96 + 14, 0, 96 - 28, 96),
-            new Sprite(this, 96 * 2 + 14, 0, 96 - 28, 96),
-            new Sprite(this, 96 * 3 + 14, 0, 96 - 28, 96)
+            new Sprite(this, 0, 0, 90, 171),
+            new Sprite(this, 90, 0, 90, 171),
+            // new Sprite(this, 200, 0, 100, 180)
         ];
         
         init();
@@ -171,6 +162,7 @@ function ElementRequestFullscreen(element) {
         "mozRequestFullScreen",
         "msRequestFullscreen"
     ];
+    
     for (let i = 0, num = list.length; i < num; i++) {
         if (element[list[i]]) {
             element[list[i]]();
@@ -181,6 +173,5 @@ function ElementRequestFullscreen(element) {
 }
 
 document.getElementById('fullscreen').addEventListener('click', function () {
-    let log = ElementRequestFullscreen(document.getElementById('canvas'));
-    console.log(log);
+    ElementRequestFullscreen(document.getElementById('canvas'));
 })
