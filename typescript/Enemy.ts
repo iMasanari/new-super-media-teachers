@@ -23,6 +23,8 @@ class Enemy extends Chara {
         this.updateSprite();
     }
     pointCheck() {
+        if (!isPlay) return;
+        
         if (!this.isAddedPoint) {
             if (player.position.x > this.position.x) {
                 let point = this.point * (1 + player.position.x / player.screenLeft) | 0;

@@ -330,6 +330,8 @@ var Enemy = (function (_super) {
     };
     Enemy.prototype.pointCheck = function () {
         var _this = this;
+        if (!isPlay)
+            return;
         if (!this.isAddedPoint) {
             if (player.position.x > this.position.x) {
                 var point = this.point * (1 + player.position.x / player.screenLeft) | 0;
