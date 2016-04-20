@@ -8,7 +8,7 @@ class Enemy extends Chara {
         x: number,
         y: number,
         point: number,
-        opacity : number
+        opacity: number
     } = null;
 
     constructor(sprites: Sprite[], screen: Screens) {
@@ -26,9 +26,9 @@ class Enemy extends Chara {
         if (!this.isAddedPoint) {
             if (player.position.x > this.position.x) {
                 let point = this.point * (1 + player.position.x / player.screenLeft) | 0;
-                
+
                 player.point += point;
-                
+
                 this.isAddedPoint = true;
                 this.pointPosition = {
                     point: point,
@@ -48,22 +48,35 @@ class Enemy extends Chara {
             ctx.font = '30px sans-serif';
             ctx.textAlign = 'center';
             ctx.globalAlpha = this.pointPosition.opacity / 100;
+            ctx.fillStyle = '#fff';
+
             this.pointPosition.opacity -= 5;
+
+            ctx.fillText('+' + this.pointPosition.point, this.pointPosition.x, this.pointPosition.y);
             ctx.strokeText('+' + this.pointPosition.point, this.pointPosition.x, this.pointPosition.y);
             this.pointPosition.y += -3;
             ctx.globalAlpha = 1;
+            ctx.fillStyle = '#000';
         }
     }
     updateSprite() {
-        if (this.screen.frame % 20 === 0) {
-            this.spriteIndex = this.spriteIndex ? 0 : 1;
+        if (this.screen.frame % 10 === 0) {
+            this.spriteIndex = (this.spriteIndex + 1) % 3;
         }
     }
     isHit(chara: Chara): boolean {
-        let a = this.position,
-            b = chara.position;
+        let a = {
+            x: this.position.x + this.width / 2,
+            y: this.position.y + this.height / 2,
+            r: this.r
+        },
+            b = {
+                x: chara.position.x + chara.width / 2,
+                y: chara.position.y + chara.height / 2,
+                r: chara.r
+            };
 
-        return (a.x - b.x) ** 2 + (a.y - b.y) ** 2 <= 60 ** 2;
+        return (a.x - b.x) ** 2 + (a.y - b.y) ** 2 <= (a.r + b.r) ** 2;
     }
     isDead(): boolean {
         return this.position.x < -this.width; // <- this.position.x + this.width < 0

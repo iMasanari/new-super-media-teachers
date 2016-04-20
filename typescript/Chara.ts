@@ -5,6 +5,7 @@
 class Chara {
     control = new CharaControler;
     spriteIndex = 0;
+    
     position: Chara.Position = {
         x: 0,
         y: 0,
@@ -16,12 +17,15 @@ class Chara {
     height: number;
     screenLeft: number;
     screenBottom: number;
+    r: number;
 
     constructor(public sprites: Sprite[], public screen: Screens) {
         this.width = sprites[0].width;
         this.height = sprites[0].height;
         this.screenLeft = screen.width - this.width;
         this.screenBottom = screen.height - this.height - 100;
+        
+        this.r = Math.min(this.width, this.height) / 2 - 2;
     }
     update() { }
     display() {

@@ -32,18 +32,34 @@ let display = new Screens(
 let socket = io.connect();
 
 let teacheresSprite;
-let img = new Image();
+let enemysSprite;
 
-img.addEventListener('load', function () {
+imageLoad('sprite.png', function () {
     teacheresSprite = [
         new Sprite(this, 0, 0, 60, 100),
         new Sprite(this, 60, 0, 60, 100),
         new Sprite(this, 120, 0, 60, 100)
     ];
-    init();
-    run();
+
+    imageLoad('enemy.png', function () {
+        enemysSprite = [
+            // new Sprite(this, 14, 0, 96 - 28, 96),
+            new Sprite(this, 96 + 14, 0, 96 - 28, 96),
+            new Sprite(this, 96 * 2 + 14, 0, 96 - 28, 96),
+            new Sprite(this, 96 * 3 + 14, 0, 96 - 28, 96)
+        ];
+        
+        init();
+        run();
+    });
 });
-img.src = 'sprite.png';
+
+function imageLoad(src: string, callback: () => void) {
+    let img = new Image();
+
+    img.addEventListener('load', callback);
+    img.src = src;
+}
 
 let player: Player;
 let otherPlayers: OtherPlayerBuilder;
@@ -54,7 +70,7 @@ function init() {
     player.control.setInputHandeler(player, socket, document.getElementById('touch-keyboard'));
 
     otherPlayers = new OtherPlayerBuilder(teacheresSprite, display);
-    enemys = new EnemyBuilder(teacheresSprite, display);
+    enemys = new EnemyBuilder(enemysSprite, display);
 
     setSocketEvent();
 }

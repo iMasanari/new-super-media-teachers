@@ -157,6 +157,7 @@ var Chara = (function () {
         this.height = sprites[0].height;
         this.screenLeft = screen.width - this.width;
         this.screenBottom = screen.height - this.height - 100;
+        this.r = Math.min(this.width, this.height) / 2 - 2;
     }
     Chara.prototype.update = function () { };
     Chara.prototype.display = function () {
@@ -350,20 +351,31 @@ var Enemy = (function (_super) {
             ctx.font = '30px sans-serif';
             ctx.textAlign = 'center';
             ctx.globalAlpha = this.pointPosition.opacity / 100;
+            ctx.fillStyle = '#fff';
             this.pointPosition.opacity -= 5;
+            ctx.fillText('+' + this.pointPosition.point, this.pointPosition.x, this.pointPosition.y);
             ctx.strokeText('+' + this.pointPosition.point, this.pointPosition.x, this.pointPosition.y);
             this.pointPosition.y += -3;
             ctx.globalAlpha = 1;
+            ctx.fillStyle = '#000';
         }
     };
     Enemy.prototype.updateSprite = function () {
-        if (this.screen.frame % 20 === 0) {
-            this.spriteIndex = this.spriteIndex ? 0 : 1;
+        if (this.screen.frame % 10 === 0) {
+            this.spriteIndex = (this.spriteIndex + 1) % 3;
         }
     };
     Enemy.prototype.isHit = function (chara) {
-        var a = this.position, b = chara.position;
-        return Math.pow((a.x - b.x), 2) + Math.pow((a.y - b.y), 2) <= Math.pow(60, 2);
+        var a = {
+            x: this.position.x + this.width / 2,
+            y: this.position.y + this.height / 2,
+            r: this.r
+        }, b = {
+            x: chara.position.x + chara.width / 2,
+            y: chara.position.y + chara.height / 2,
+            r: chara.r
+        };
+        return Math.pow((a.x - b.x), 2) + Math.pow((a.y - b.y), 2) <= Math.pow((a.r + b.r), 2);
     };
     Enemy.prototype.isDead = function () {
         return this.position.x < -this.width;
@@ -422,17 +434,28 @@ var animationFrame = (function () {
 var display = new Screens(document.getElementById('canvas'), 500, 500);
 var socket = io.connect();
 var teacheresSprite;
-var img = new Image();
-img.addEventListener('load', function () {
+var enemysSprite;
+imageLoad('sprite.png', function () {
     teacheresSprite = [
         new Sprite(this, 0, 0, 60, 100),
         new Sprite(this, 60, 0, 60, 100),
         new Sprite(this, 120, 0, 60, 100)
     ];
-    init();
-    run();
+    imageLoad('enemy.png', function () {
+        enemysSprite = [
+            new Sprite(this, 96 + 14, 0, 96 - 28, 96),
+            new Sprite(this, 96 * 2 + 14, 0, 96 - 28, 96),
+            new Sprite(this, 96 * 3 + 14, 0, 96 - 28, 96)
+        ];
+        init();
+        run();
+    });
 });
-img.src = 'sprite.png';
+function imageLoad(src, callback) {
+    var img = new Image();
+    img.addEventListener('load', callback);
+    img.src = src;
+}
 var player;
 var otherPlayers;
 var enemys;
@@ -440,7 +463,7 @@ function init() {
     player = new Player(teacheresSprite, display);
     player.control.setInputHandeler(player, socket, document.getElementById('touch-keyboard'));
     otherPlayers = new OtherPlayerBuilder(teacheresSprite, display);
-    enemys = new EnemyBuilder(teacheresSprite, display);
+    enemys = new EnemyBuilder(enemysSprite, display);
     setSocketEvent();
 }
 var time = new Date().getTime(), fps = 60;
