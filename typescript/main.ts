@@ -53,15 +53,15 @@ imageLoad('sprite.png', function () {
                     // new Sprite(this, 128, 0, 60, 100)
                 ];
 
-                // imageLoad('usagi-player.png', function () {
-                //     sprites.teacher[1] = sprites.teacher[0] = [
-                //         new Sprite(this, 0, 0, 89, 168),
-                //         new Sprite(this, 92, 0, 89, 168),
-                //         new Sprite(this, 186, 0, 89, 168)
-                //     ];
-                init();
-                display.run();
-                // });
+                imageLoad('usagi-player.png', function () {
+                    sprites.teacher[2] = [
+                        new Sprite(this, 0, 0, 89, 168),
+                        new Sprite(this, 92, 0, 89, 168),
+                        new Sprite(this, 186, 0, 89, 168)
+                    ];
+                    init();
+                    display.run();
+                });
             });
         });
     });

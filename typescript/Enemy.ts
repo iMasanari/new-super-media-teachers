@@ -3,7 +3,7 @@
 class Enemy extends Chara {
     spritesLen: number;
     speed = 5;
-    
+
     isAddedPoint = false;
     point = 50;
     pointPosition: {
@@ -18,7 +18,7 @@ class Enemy extends Chara {
 
         this.position.x = screen.width;
         this.position.y = this.screenBottom;
-        
+
         this.spritesLen = sprites.length;
     }
     update() {
@@ -28,7 +28,7 @@ class Enemy extends Chara {
     }
     pointCheck() {
         if (!isPlay) return;
-        
+
         if (!this.isAddedPoint) {
             if (player.position.x > this.position.x) {
                 let point = this.point * (1 + player.position.x / player.screenLeft) | 0;
@@ -107,6 +107,15 @@ class EnemyBuilder {
         for (let i = 0, enemy: Enemy; enemy = this.list[i]; ++i) {
             enemy.update();
             if (enemy.isHit(player)) {
+
+                // おふざけ
+                player.sprites = sprites.teacher[Math.random() * 3 | 0];
+                player.width = player.sprites[0].width;
+                player.height = player.sprites[0].height;
+                player.screenLeft = player.screen.width - player.width;
+                player.screenBottom = player.screen.height - player.height - 100;
+                player.r = Math.min(player.width, player.height) / 2 - 2;
+
                 player.position = {
                     x: 0,
                     y: 0,

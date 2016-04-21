@@ -463,6 +463,12 @@ var EnemyBuilder = (function () {
         for (var i = 0, enemy = void 0; enemy = this.list[i]; ++i) {
             enemy.update();
             if (enemy.isHit(player)) {
+                player.sprites = sprites.teacher[Math.random() * 3 | 0];
+                player.width = player.sprites[0].width;
+                player.height = player.sprites[0].height;
+                player.screenLeft = player.screen.width - player.width;
+                player.screenBottom = player.screen.height - player.height - 100;
+                player.r = Math.min(player.width, player.height) / 2 - 2;
                 player.position = {
                     x: 0,
                     y: 0,
@@ -548,8 +554,15 @@ imageLoad('sprite.png', function () {
                     new Sprite(this, 0, 0, 60, 100),
                     new Sprite(this, 64, 0, 60, 100),
                 ];
-                init();
-                display.run();
+                imageLoad('usagi-player.png', function () {
+                    sprites.teacher[2] = [
+                        new Sprite(this, 0, 0, 89, 168),
+                        new Sprite(this, 92, 0, 89, 168),
+                        new Sprite(this, 186, 0, 89, 168)
+                    ];
+                    init();
+                    display.run();
+                });
             });
         });
     });
