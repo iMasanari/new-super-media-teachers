@@ -379,9 +379,9 @@ var Enemy = (function (_super) {
     __extends(Enemy, _super);
     function Enemy(sprites, screen) {
         _super.call(this, sprites, screen);
-        this.speed = 5;
-        this.isAddedPoint = false;
+        this.speed = 4;
         this.point = 50;
+        this.isAddedPoint = false;
         this.pointPosition = null;
         this.position.x = screen.width;
         this.position.y = this.screenBottom;
@@ -510,15 +510,36 @@ var Ai = (function (_super) {
     __extends(Ai, _super);
     function Ai(screens) {
         _super.call(this, sprites.ai, screens);
-        this.speed = 4;
-        this.point = 50;
     }
     return Ai;
+}(Enemy));
+var Ps = (function (_super) {
+    __extends(Ps, _super);
+    function Ps(screens) {
+        _super.call(this, sprites.ps, screens);
+    }
+    return Ps;
+}(Enemy));
+var Pr = (function (_super) {
+    __extends(Pr, _super);
+    function Pr(screens) {
+        _super.call(this, sprites.pr, screens);
+    }
+    return Pr;
+}(Enemy));
+var Ae = (function (_super) {
+    __extends(Ae, _super);
+    function Ae(screens) {
+        _super.call(this, sprites.Ae, screens);
+    }
+    return Ae;
 }(Enemy));
 var Piyo = (function (_super) {
     __extends(Piyo, _super);
     function Piyo(screens) {
         _super.call(this, sprites.piyo, screens);
+        this.speed = 5;
+        this.point = 60;
     }
     return Piyo;
 }(Enemy));
@@ -549,10 +570,22 @@ imageLoad('sprite.png', function () {
                 new Sprite(this, 0, 0, 90, 168),
                 new Sprite(this, 92, 0, 90, 168)
             ];
-            imageLoad('ai.png', function () {
+            imageLoad('adobe.png', function () {
                 sprites.ai = [
                     new Sprite(this, 0, 0, 60, 100),
-                    new Sprite(this, 64, 0, 60, 100),
+                    new Sprite(this, 64, 0, 60, 100)
+                ];
+                sprites.ps = [
+                    new Sprite(this, 0, 108, 60, 100),
+                    new Sprite(this, 64, 108, 60, 100)
+                ];
+                sprites.pr = [
+                    new Sprite(this, 0, 216, 60, 100),
+                    new Sprite(this, 64, 216, 60, 100)
+                ];
+                sprites.ae = [
+                    new Sprite(this, 0, 324, 60, 100),
+                    new Sprite(this, 64, 324, 60, 100)
                 ];
                 imageLoad('usagi-player.png', function () {
                     sprites.teacher[2] = [

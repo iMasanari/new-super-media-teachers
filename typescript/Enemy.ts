@@ -2,10 +2,10 @@
 
 class Enemy extends Chara {
     spritesLen: number;
-    speed = 5;
+    speed = 4;
+    point = 50;
 
     isAddedPoint = false;
-    point = 50;
     pointPosition: {
         x: number,
         y: number,

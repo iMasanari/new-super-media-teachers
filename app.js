@@ -56,6 +56,9 @@ io.sockets.on('connection', function (socket) {
 var enemyList = [
     'Piyo',
     'Ai',
+    'Ps',
+    'Pr',
+    'Ae',
     'Usagi'
 ],
     enemyListLen = enemyList.length;

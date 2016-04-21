@@ -46,11 +46,22 @@ imageLoad('sprite.png', function () {
                 new Sprite(this, 92, 0, 90, 168)
             ];
 
-            imageLoad('ai.png', function () {
+            imageLoad('adobe.png', function () {
                 sprites.ai = [
                     new Sprite(this, 0, 0, 60, 100),
-                    new Sprite(this, 64, 0, 60, 100),
-                    // new Sprite(this, 128, 0, 60, 100)
+                    new Sprite(this, 64, 0, 60, 100)
+                ];
+                sprites.ps = [
+                    new Sprite(this, 0, 108, 60, 100),
+                    new Sprite(this, 64, 108, 60, 100)
+                ];
+                sprites.pr = [
+                    new Sprite(this, 0, 216, 60, 100),
+                    new Sprite(this, 64, 216, 60, 100)
+                ];
+                sprites.ae = [
+                    new Sprite(this, 0, 324, 60, 100),
+                    new Sprite(this, 64, 324, 60, 100)
                 ];
 
                 imageLoad('usagi-player.png', function () {
