@@ -8,8 +8,7 @@ class Game {
     maxFrameSkip = 10;
 
     private skipTicks = 1000 / this.fps;
-    private nextGameTick = Date.now();
-    private intervalId: number;
+    private nextGameTick: number;
 
     constructor(public canvas: HTMLCanvasElement, public width: number, public height: number) {
         this.width = width;
@@ -19,27 +18,31 @@ class Game {
         this.ctx = this.canvas.getContext("2d");
     }
     run() {
-        let loopCount = 0;
+        let loop = () => {
+            let loopCount = 0;
+            let now = Date.now();
 
-        let now = Date.now();
+            if (now - this.nextGameTick < 1000) {
+                while (now > this.nextGameTick && loopCount < this.maxFrameSkip) {
+                    update();
+                    this.nextGameTick += this.skipTicks;
+                    loopCount++;
+                }
+            } else {
+                console.log('skip!!');
 
-        if (now - this.nextGameTick < 1000) {
-            while (now > this.nextGameTick && loopCount < this.maxFrameSkip) {
-                update();
-                this.nextGameTick += this.skipTicks;
-                loopCount++;
+                // 敵を全てリセット
+                enemys.list = [];
+
+                this.nextGameTick = now;
             }
-        } else {
-            console.log('skip!!');
-            
-            this.nextGameTick = now;
-        }
 
-        render();
-        this.requestAnimationFrame(this.run.bind(this));
-    }
-    stop() {
-        clearInterval(this.intervalId);
+            render();
+            this.requestAnimationFrame(loop);
+        }
+        
+        this.nextGameTick = Date.now();
+        loop();
     }
     clear() {
         this.ctx.clearRect(0, 0, this.width, this.height);

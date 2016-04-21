@@ -1,13 +1,21 @@
 class Usagi extends Enemy {
-    speed = 2;
+    speed = 3;
     point = 70;
     
     constructor(screens: Game) {
-        super(usagiSprite, screens);
+        super(sprites.usagi, screens);
+    }
+}
+class Ai extends Enemy {
+    speed = 4;
+    point = 50;
+    
+    constructor(screens: Game) {
+        super(sprites.ai, screens);
     }
 }
 class Piyo extends Enemy {
     constructor(screens: Game) {
-        super(piyoSprite, screens);
+        super(sprites.piyo, screens);
     }
 }

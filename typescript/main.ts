@@ -15,39 +15,54 @@ let display = new Game(
 
 let socket = io.connect();
 
-let teacheresSprites = [];
-let piyoSprite;
-let usagiSprite;
+let sprites: any = {
+    teacher: []
+};
 
 // コールバック地獄！ 後で直す
 imageLoad('sprite.png', function () {
-    teacheresSprites[0] = [
+    sprites.teacher[0] = [
         new Sprite(this, 0, 0, 60, 104),
         new Sprite(this, 64, 0, 60, 104),
         new Sprite(this, 128, 0, 60, 104)
     ];
-    teacheresSprites[1] = [
+    sprites.teacher[1] = [
         new Sprite(this, 0, 108, 60, 104),
         new Sprite(this, 64, 108, 60, 104),
         new Sprite(this, 128, 108, 60, 104)
     ];
 
     imageLoad('enemy.png', function () {
-        piyoSprite = [
+        sprites.piyo = [
             // new Sprite(this, 14, 0, 96 - 28, 96),
             new Sprite(this, 96 + 14, 0, 96 - 28, 96),
             new Sprite(this, 96 * 2 + 14, 0, 96 - 28, 96),
             new Sprite(this, 96 * 3 + 14, 0, 96 - 28, 96)
         ];
-        
+
         imageLoad('usagi.png', function () {
-            usagiSprite = [
-                new Sprite(this, 0, 0, 90, 171),
-                new Sprite(this, 90, 0, 90, 171)
+            sprites.usagi = [
+                new Sprite(this, 0, 0, 90, 168),
+                new Sprite(this, 92, 0, 90, 168)
             ];
 
-            init();
-            display.run();
+            imageLoad('ai.png', function () {
+                sprites.ai = [
+                    new Sprite(this, 0, 0, 60, 100),
+                    new Sprite(this, 64, 0, 60, 100),
+                    // new Sprite(this, 128, 0, 60, 100)
+                ];
+
+                // imageLoad('usagi-player.png', function () {
+                //     sprites.teacher[1] = sprites.teacher[0] = [
+                //         new Sprite(this, 0, 0, 89, 168),
+                //         new Sprite(this, 92, 0, 89, 168),
+                //         new Sprite(this, 186, 0, 89, 168)
+                //     ];
+                init();
+                display.run();
+                // });
+            });
         });
     });
 });
@@ -65,10 +80,10 @@ let enemys: EnemyBuilder;
 
 function init() {
     let i = Math.random() * 2 | 0
-    player = new Player(teacheresSprites[i], display);
+    player = new Player(sprites.teacher[i], display);
     player.control.setInputHandeler(player, socket, document.getElementById('touch-keyboard'));
 
-    otherPlayers = new OtherPlayerBuilder(teacheresSprites[i], display);
+    otherPlayers = new OtherPlayerBuilder(sprites.teacher[i], display);
     enemys = new EnemyBuilder(display);
 
     setSocketEvent();

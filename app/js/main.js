@@ -22,7 +22,6 @@ var Game = (function () {
         this.fps = 50;
         this.maxFrameSkip = 10;
         this.skipTicks = 1000 / this.fps;
-        this.nextGameTick = Date.now();
         this.width = width;
         this.height = height;
         this.canvas.width = width;
@@ -30,24 +29,27 @@ var Game = (function () {
         this.ctx = this.canvas.getContext("2d");
     }
     Game.prototype.run = function () {
-        var loopCount = 0;
-        var now = Date.now();
-        if (now - this.nextGameTick < 1000) {
-            while (now > this.nextGameTick && loopCount < this.maxFrameSkip) {
-                update();
-                this.nextGameTick += this.skipTicks;
-                loopCount++;
+        var _this = this;
+        var loop = function () {
+            var loopCount = 0;
+            var now = Date.now();
+            if (now - _this.nextGameTick < 1000) {
+                while (now > _this.nextGameTick && loopCount < _this.maxFrameSkip) {
+                    update();
+                    _this.nextGameTick += _this.skipTicks;
+                    loopCount++;
+                }
             }
-        }
-        else {
-            console.log('skip!!');
-            this.nextGameTick = now;
-        }
-        render();
-        this.requestAnimationFrame(this.run.bind(this));
-    };
-    Game.prototype.stop = function () {
-        clearInterval(this.intervalId);
+            else {
+                console.log('skip!!');
+                enemys.list = [];
+                _this.nextGameTick = now;
+            }
+            render();
+            _this.requestAnimationFrame(loop);
+        };
+        this.nextGameTick = Date.now();
+        loop();
     };
     Game.prototype.clear = function () {
         this.ctx.clearRect(0, 0, this.width, this.height);
@@ -492,48 +494,63 @@ var EnemyBuilder = (function () {
 var Usagi = (function (_super) {
     __extends(Usagi, _super);
     function Usagi(screens) {
-        _super.call(this, usagiSprite, screens);
-        this.speed = 2;
+        _super.call(this, sprites.usagi, screens);
+        this.speed = 3;
         this.point = 70;
     }
     return Usagi;
 }(Enemy));
+var Ai = (function (_super) {
+    __extends(Ai, _super);
+    function Ai(screens) {
+        _super.call(this, sprites.ai, screens);
+        this.speed = 4;
+        this.point = 50;
+    }
+    return Ai;
+}(Enemy));
 var Piyo = (function (_super) {
     __extends(Piyo, _super);
     function Piyo(screens) {
-        _super.call(this, piyoSprite, screens);
+        _super.call(this, sprites.piyo, screens);
     }
     return Piyo;
 }(Enemy));
 var display = new Game(document.getElementById('canvas'), 500, 500);
 var socket = io.connect();
-var teacheresSprites = [];
-var piyoSprite;
-var usagiSprite;
+var sprites = {
+    teacher: []
+};
 imageLoad('sprite.png', function () {
-    teacheresSprites[0] = [
+    sprites.teacher[0] = [
         new Sprite(this, 0, 0, 60, 104),
         new Sprite(this, 64, 0, 60, 104),
         new Sprite(this, 128, 0, 60, 104)
     ];
-    teacheresSprites[1] = [
+    sprites.teacher[1] = [
         new Sprite(this, 0, 108, 60, 104),
         new Sprite(this, 64, 108, 60, 104),
         new Sprite(this, 128, 108, 60, 104)
     ];
     imageLoad('enemy.png', function () {
-        piyoSprite = [
+        sprites.piyo = [
             new Sprite(this, 96 + 14, 0, 96 - 28, 96),
             new Sprite(this, 96 * 2 + 14, 0, 96 - 28, 96),
             new Sprite(this, 96 * 3 + 14, 0, 96 - 28, 96)
         ];
         imageLoad('usagi.png', function () {
-            usagiSprite = [
-                new Sprite(this, 0, 0, 90, 171),
-                new Sprite(this, 90, 0, 90, 171)
+            sprites.usagi = [
+                new Sprite(this, 0, 0, 90, 168),
+                new Sprite(this, 92, 0, 90, 168)
             ];
-            init();
-            display.run();
+            imageLoad('ai.png', function () {
+                sprites.ai = [
+                    new Sprite(this, 0, 0, 60, 100),
+                    new Sprite(this, 64, 0, 60, 100),
+                ];
+                init();
+                display.run();
+            });
         });
     });
 });
@@ -547,9 +564,9 @@ var otherPlayers;
 var enemys;
 function init() {
     var i = Math.random() * 2 | 0;
-    player = new Player(teacheresSprites[i], display);
+    player = new Player(sprites.teacher[i], display);
     player.control.setInputHandeler(player, socket, document.getElementById('touch-keyboard'));
-    otherPlayers = new OtherPlayerBuilder(teacheresSprites[i], display);
+    otherPlayers = new OtherPlayerBuilder(sprites.teacher[i], display);
     enemys = new EnemyBuilder(display);
     setSocketEvent();
 }
