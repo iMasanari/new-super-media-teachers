@@ -53,11 +53,17 @@ io.sockets.on('connection', function (socket) {
     }
 });
 
+var enemyList = [
+    'Piyo',
+    'Usagi'
+],
+    enemyListLen = enemyList.length;
+    
 function addEnemy() {
-    io.sockets.emit('addEnemy');
+    io.sockets.emit('addEnemy', enemyList[Math.random() * enemyListLen | 0]);
 }
 
 (function loop() {
     setTimeout(addEnemy, Math.random() * 2000);
-    setTimeout(loop, 2000);
+    setTimeout(loop, 3000);
 })();

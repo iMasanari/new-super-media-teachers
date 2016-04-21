@@ -123,8 +123,8 @@ function setSocketEvent() {
         chara.control.inputEnd(data.keyCode);
         chara.sync(data.position);
     });
-    socket.on('addEnemy', function () {
-        enemys.add();
+    socket.on('addEnemy', function (name) {
+        enemys.add(name);
     });
     socket.on('request-update', function (data?: socketData) {
         socket.emit('update', {
@@ -145,11 +145,6 @@ document.addEventListener('touchstert', function (e) { e.preventDefault(); });
 document.addEventListener('touchmove', function (e) { e.preventDefault(); });
 document.addEventListener('touchend', function (e) { e.preventDefault(); });
 
-interface socketData {
-    id: string,
-    keyCode: number,
-    position: Chara.Position
-}
 function ElementRequestFullscreen(element) {
     let list = [
         "requestFullscreen",
@@ -169,4 +164,10 @@ function ElementRequestFullscreen(element) {
 
 document.getElementById('fullscreen').addEventListener('click', function () {
     ElementRequestFullscreen(document.getElementById('canvas'));
-})
+});
+
+interface socketData {
+    id: string,
+    keyCode: number,
+    position: Chara.Position
+}

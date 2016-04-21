@@ -97,10 +97,7 @@ class EnemyBuilder {
 
     constructor(public screen: Game) { }
 
-    add(name = 'Usagi') {
-        if(display.frame % 2) {
-            name = 'Piyo';
-        }
+    add(name: string) {
         this.list.push(new window[name](this.screen));
     }
     remove(n: number) {

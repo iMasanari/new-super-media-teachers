@@ -452,10 +452,6 @@ var EnemyBuilder = (function () {
         this.list = [];
     }
     EnemyBuilder.prototype.add = function (name) {
-        if (name === void 0) { name = 'Usagi'; }
-        if (display.frame % 2) {
-            name = 'Piyo';
-        }
         this.list.push(new window[name](this.screen));
     };
     EnemyBuilder.prototype.remove = function (n) {
@@ -598,8 +594,8 @@ function setSocketEvent() {
         chara.control.inputEnd(data.keyCode);
         chara.sync(data.position);
     });
-    socket.on('addEnemy', function () {
-        enemys.add();
+    socket.on('addEnemy', function (name) {
+        enemys.add(name);
     });
     socket.on('request-update', function (data) {
         socket.emit('update', {
