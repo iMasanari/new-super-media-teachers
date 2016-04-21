@@ -1,5 +1,5 @@
 /// <reference path="Sprite.ts" />
-/// <reference path="Screens.ts" />
+/// <reference path="Game.ts" />
 /// <reference path="CharaControler.ts" />
 
 class Chara {
@@ -19,7 +19,7 @@ class Chara {
     screenBottom: number;
     r: number;
 
-    constructor(public sprites: Sprite[], public screen: Screens) {
+    constructor(public sprites: Sprite[], public screen: Game) {
         this.width = sprites[0].width;
         this.height = sprites[0].height;
         this.screenLeft = screen.width - this.width;

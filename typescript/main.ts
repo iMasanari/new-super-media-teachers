@@ -1,6 +1,6 @@
 /// <reference path="tsd/socket.io-client.d.ts" />
 
-/// <reference path="Screens.ts" />
+/// <reference path="Game.ts" />
 /// <reference path="Sprite.ts" />
 /// <reference path="CharaControler.ts" />
 /// <reference path="Player.ts" />
@@ -8,10 +8,11 @@
 /// <reference path="Enemy.ts" />
 /// <reference path="Usagi.ts" />
 
-let display = new Screens(
+let display = new Game(
     <HTMLCanvasElement>document.getElementById('canvas'),
     500, 500
 );
+
 let socket = io.connect();
 
 let teacheresSprites = [];
@@ -46,7 +47,7 @@ imageLoad('sprite.png', function () {
             ];
 
             init();
-            run();
+            display.run();
         });
     });
 });
@@ -73,42 +74,7 @@ function init() {
     setSocketEvent();
 }
 
-let time = new Date().getTime(),
-    fps = 50;
-
-function _run() {
-    let _time = new Date().getTime();
-
-    fps = 1000 / (_time - time);
-    time = _time;
-
-    update();
-    render();
-
-    window.setTimeout(_run, 1000 / 60);
-    // animationFrame(run);
-}
-let run = (function() {
-    var loops = 0;
-    var skipTicks = 1000 / fps;
-    var maxFrameSkip = 10;
-    var nextGameTick = Date.now();
-
-    return function() {
-        loops = 0;
-
-        while (Date.now() > nextGameTick && loops < maxFrameSkip) {
-            update();
-            nextGameTick += skipTicks;
-            loops++;
-        }
-
-        render();
-    };
-})();
-
-// Start the game loop
-let _intervalId = setInterval(run, 0);
+let time = Date.now();
 
 let isPlay = true;
 

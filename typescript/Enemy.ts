@@ -2,6 +2,7 @@
 
 class Enemy extends Chara {
     spritesLen: number;
+    speed = 5;
     
     isAddedPoint = false;
     point = 50;
@@ -12,7 +13,7 @@ class Enemy extends Chara {
         opacity: number
     } = null;
 
-    constructor(sprites: Sprite[], screen: Screens) {
+    constructor(sprites: Sprite[], screen: Game) {
         super(sprites, screen);
 
         this.position.x = screen.width;
@@ -21,7 +22,7 @@ class Enemy extends Chara {
         this.spritesLen = sprites.length;
     }
     update() {
-        this.position.x -= 4;
+        this.position.x -= this.speed;
         this.pointCheck();
         this.updateSprite();
     }
@@ -94,7 +95,7 @@ class Enemy extends Chara {
 class EnemyBuilder {
     list: Enemy[] = [];
 
-    constructor(public screen: Screens) { }
+    constructor(public screen: Game) { }
 
     add(name = 'Usagi') {
         if(display.frame % 2) {

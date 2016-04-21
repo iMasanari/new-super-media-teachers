@@ -12,9 +12,13 @@ class Player extends Chara {
         if (this.control.isDown(39)) {
             this.position.sx += this.isFly ? 0.1 : 0.4;
         }
-        if (this.control.isDown(38) && !this.isFly) {
-            this.isFly = true;
-            this.position.sy = -10;
+        if (this.control.isDown(38)) {
+            if (this.isFly) {
+                this.position.sy -= 0.1;
+            } else {
+                this.isFly = true;
+                this.position.sy = -9;
+            }
         }
     }
     update() {
@@ -28,7 +32,7 @@ class Player extends Chara {
         super.display();
         ctx.font = '50px sans-serif';
         ctx.textAlign = 'right';
-        ctx.strokeText(this.point.toFixed(0), 500 - 10, 50);
+        ctx.fillText(this.point.toFixed(0), 500 - 10, 50);
         ctx.font = '25px sans-serif';
         ctx.fillText('MAX: ' + Math.max(this.maxPoint, this.point), 500 - 200, 40);
     }

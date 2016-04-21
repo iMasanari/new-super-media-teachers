@@ -13,26 +13,75 @@ var Sprite = (function () {
     }
     return Sprite;
 }());
-var Screens = (function () {
-    function Screens(canvas, width, height) {
+var Game = (function () {
+    function Game(canvas, width, height) {
         this.canvas = canvas;
         this.width = width;
         this.height = height;
         this.frame = 0;
+        this.fps = 50;
+        this.maxFrameSkip = 10;
+        this.skipTicks = 1000 / this.fps;
+        this.nextGameTick = Date.now();
         this.width = width;
         this.height = height;
         this.canvas.width = width;
         this.canvas.height = height;
         this.ctx = this.canvas.getContext("2d");
     }
-    Screens.prototype.clear = function () {
+    Game.prototype.run = function () {
+        var loopCount = 0;
+        var now = Date.now();
+        if (now - this.nextGameTick < 1000) {
+            while (now > this.nextGameTick && loopCount < this.maxFrameSkip) {
+                update();
+                this.nextGameTick += this.skipTicks;
+                loopCount++;
+            }
+        }
+        else {
+            console.log('skip!!');
+            this.nextGameTick = now;
+        }
+        render();
+        this.requestAnimationFrame(this.run.bind(this));
+    };
+    Game.prototype.stop = function () {
+        clearInterval(this.intervalId);
+    };
+    Game.prototype.clear = function () {
         this.ctx.clearRect(0, 0, this.width, this.height);
     };
-    Screens.prototype.drawSprite = function (sprite, x, y) {
+    Game.prototype.drawSprite = function (sprite, x, y) {
         this.ctx.drawImage(sprite.img, sprite.x, sprite.y, sprite.width, sprite.height, x, y, sprite.width, sprite.height);
     };
-    return Screens;
+    return Game;
 }());
+Game.prototype.requestAnimationFrame = (function () {
+    var list = [
+        'requestAnimationFrame',
+        'webkitRequestAnimationFrame',
+        'mozRequestAnimationFrame',
+        'oRequestAnimationFrame',
+        'msRequestAnimationFrame'
+    ];
+    var _loop_1 = function(i, val) {
+        if (window[val]) {
+            console.log('use ' + val);
+            return { value: function (callback) {
+                window[val](callback);
+            } };
+        }
+    };
+    for (var i = 0, val = void 0; val = list[i]; ++i) {
+        var state_1 = _loop_1(i, val);
+        if (typeof state_1 === "object") return state_1.value;
+    }
+    console.log('use setTimeout');
+    return function (callback) {
+        window.setTimeout(callback, 30);
+    };
+})();
 var CharaControler = (function () {
     function CharaControler() {
         this.down = {};
@@ -180,9 +229,14 @@ var Player = (function (_super) {
         if (this.control.isDown(39)) {
             this.position.sx += this.isFly ? 0.1 : 0.4;
         }
-        if (this.control.isDown(38) && !this.isFly) {
-            this.isFly = true;
-            this.position.sy = -10;
+        if (this.control.isDown(38)) {
+            if (this.isFly) {
+                this.position.sy -= 0.1;
+            }
+            else {
+                this.isFly = true;
+                this.position.sy = -9;
+            }
         }
     };
     Player.prototype.update = function () {
@@ -195,7 +249,7 @@ var Player = (function (_super) {
         _super.prototype.display.call(this);
         ctx.font = '50px sans-serif';
         ctx.textAlign = 'right';
-        ctx.strokeText(this.point.toFixed(0), 500 - 10, 50);
+        ctx.fillText(this.point.toFixed(0), 500 - 10, 50);
         ctx.font = '25px sans-serif';
         ctx.fillText('MAX: ' + Math.max(this.maxPoint, this.point), 500 - 200, 40);
     };
@@ -271,10 +325,16 @@ var OtherPlayer = (function (_super) {
             this.position.sx += sx;
             this._position.sx += sx;
         }
-        if (this.control.isDown(38) && !this.isFly) {
-            this.isFly = true;
-            this.position.sy = -10;
-            this._position.sy = -10;
+        if (this.control.isDown(38)) {
+            if (this.isFly) {
+                this.position.sy -= 0.1;
+                this._position.sy -= 0.1;
+            }
+            else {
+                this.isFly = true;
+                this._position.sy = -10;
+                this.position.sy = -10;
+            }
         }
     };
     OtherPlayer.prototype.sync = function (data) {
@@ -317,6 +377,7 @@ var Enemy = (function (_super) {
     __extends(Enemy, _super);
     function Enemy(sprites, screen) {
         _super.call(this, sprites, screen);
+        this.speed = 5;
         this.isAddedPoint = false;
         this.point = 50;
         this.pointPosition = null;
@@ -325,7 +386,7 @@ var Enemy = (function (_super) {
         this.spritesLen = sprites.length;
     }
     Enemy.prototype.update = function () {
-        this.position.x -= 4;
+        this.position.x -= this.speed;
         this.pointCheck();
         this.updateSprite();
     };
@@ -436,6 +497,8 @@ var Usagi = (function (_super) {
     __extends(Usagi, _super);
     function Usagi(screens) {
         _super.call(this, usagiSprite, screens);
+        this.speed = 2;
+        this.point = 70;
     }
     return Usagi;
 }(Enemy));
@@ -446,7 +509,7 @@ var Piyo = (function (_super) {
     }
     return Piyo;
 }(Enemy));
-var display = new Screens(document.getElementById('canvas'), 500, 500);
+var display = new Game(document.getElementById('canvas'), 500, 500);
 var socket = io.connect();
 var teacheresSprites = [];
 var piyoSprite;
@@ -474,7 +537,7 @@ imageLoad('sprite.png', function () {
                 new Sprite(this, 90, 0, 90, 171)
             ];
             init();
-            run();
+            display.run();
         });
     });
 });
@@ -494,31 +557,7 @@ function init() {
     enemys = new EnemyBuilder(display);
     setSocketEvent();
 }
-var time = new Date().getTime(), fps = 50;
-function _run() {
-    var _time = new Date().getTime();
-    fps = 1000 / (_time - time);
-    time = _time;
-    update();
-    render();
-    window.setTimeout(_run, 1000 / 60);
-}
-var run = (function () {
-    var loops = 0;
-    var skipTicks = 1000 / fps;
-    var maxFrameSkip = 10;
-    var nextGameTick = Date.now();
-    return function () {
-        loops = 0;
-        while (Date.now() > nextGameTick && loops < maxFrameSkip) {
-            update();
-            nextGameTick += skipTicks;
-            loops++;
-        }
-        render();
-    };
-})();
-var _intervalId = setInterval(run, 0);
+var time = Date.now();
 var isPlay = true;
 function update() {
     ++display.frame;

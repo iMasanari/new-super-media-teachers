@@ -37,10 +37,15 @@ class OtherPlayer extends Player {
             this.position.sx += sx;
             this._position.sx += sx;
         }
-        if (this.control.isDown(38) && !this.isFly) {
-            this.isFly = true;
-            this.position.sy = -10;
-            this._position.sy = -10;
+        if (this.control.isDown(38)) {
+            if (this.isFly) {
+                this.position.sy -= 0.1;
+                this._position.sy -= 0.1;
+            } else {
+                this.isFly = true;
+                this._position.sy = -10;
+                this.position.sy = -10;
+            }
         }
     }
     sync(data) {
@@ -53,7 +58,7 @@ class OtherPlayer extends Player {
 class OtherPlayerBuilder {
     players: { [x: string]: OtherPlayer } = {};
 
-    constructor(public sprites: Sprite[], public screen: Screens) { }
+    constructor(public sprites: Sprite[], public screen: Game) { }
 
     getPlayer(id: string) {
         let chara = this.players[id];
