@@ -322,6 +322,7 @@ var Enemy = (function (_super) {
         this.pointPosition = null;
         this.position.x = screen.width;
         this.position.y = this.screenBottom;
+        this.spritesLen = sprites.length;
     }
     Enemy.prototype.update = function () {
         this.position.x -= 4;
@@ -364,7 +365,7 @@ var Enemy = (function (_super) {
     };
     Enemy.prototype.updateSprite = function () {
         if (this.screen.frame % 20 === 0) {
-            this.spriteIndex = (this.spriteIndex + 1) % 2;
+            this.spriteIndex = (this.spriteIndex + 1) % this.spritesLen;
         }
     };
     Enemy.prototype.isHit = function (chara) {
@@ -385,13 +386,16 @@ var Enemy = (function (_super) {
     return Enemy;
 }(Chara));
 var EnemyBuilder = (function () {
-    function EnemyBuilder(sprites, screen) {
-        this.sprites = sprites;
+    function EnemyBuilder(screen) {
         this.screen = screen;
         this.list = [];
     }
-    EnemyBuilder.prototype.add = function () {
-        this.list.push(new Enemy(this.sprites, this.screen));
+    EnemyBuilder.prototype.add = function (name) {
+        if (name === void 0) { name = 'Usagi'; }
+        if (display.frame % 2) {
+            name = 'Piyo';
+        }
+        this.list.push(new window[name](this.screen));
     };
     EnemyBuilder.prototype.remove = function (n) {
         this.list.splice(n, 1);
@@ -428,23 +432,50 @@ var EnemyBuilder = (function () {
     };
     return EnemyBuilder;
 }());
+var Usagi = (function (_super) {
+    __extends(Usagi, _super);
+    function Usagi(screens) {
+        _super.call(this, usagiSprite, screens);
+    }
+    return Usagi;
+}(Enemy));
+var Piyo = (function (_super) {
+    __extends(Piyo, _super);
+    function Piyo(screens) {
+        _super.call(this, piyoSprite, screens);
+    }
+    return Piyo;
+}(Enemy));
 var display = new Screens(document.getElementById('canvas'), 500, 500);
 var socket = io.connect();
-var teacheresSprite;
-var enemysSprite;
+var teacheresSprites = [];
+var piyoSprite;
+var usagiSprite;
 imageLoad('sprite.png', function () {
-    teacheresSprite = [
-        new Sprite(this, 0, 0, 60, 100),
-        new Sprite(this, 60, 0, 60, 100),
-        new Sprite(this, 120, 0, 60, 100)
+    teacheresSprites[0] = [
+        new Sprite(this, 0, 0, 60, 104),
+        new Sprite(this, 64, 0, 60, 104),
+        new Sprite(this, 128, 0, 60, 104)
     ];
-    imageLoad('usagi.png', function () {
-        enemysSprite = [
-            new Sprite(this, 0, 0, 90, 171),
-            new Sprite(this, 90, 0, 90, 171),
+    teacheresSprites[1] = [
+        new Sprite(this, 0, 108, 60, 104),
+        new Sprite(this, 64, 108, 60, 104),
+        new Sprite(this, 128, 108, 60, 104)
+    ];
+    imageLoad('enemy.png', function () {
+        piyoSprite = [
+            new Sprite(this, 96 + 14, 0, 96 - 28, 96),
+            new Sprite(this, 96 * 2 + 14, 0, 96 - 28, 96),
+            new Sprite(this, 96 * 3 + 14, 0, 96 - 28, 96)
         ];
-        init();
-        run();
+        imageLoad('usagi.png', function () {
+            usagiSprite = [
+                new Sprite(this, 0, 0, 90, 171),
+                new Sprite(this, 90, 0, 90, 171)
+            ];
+            init();
+            run();
+        });
     });
 });
 function imageLoad(src, callback) {
@@ -456,21 +487,38 @@ var player;
 var otherPlayers;
 var enemys;
 function init() {
-    player = new Player(teacheresSprite, display);
+    var i = Math.random() * 2 | 0;
+    player = new Player(teacheresSprites[i], display);
     player.control.setInputHandeler(player, socket, document.getElementById('touch-keyboard'));
-    otherPlayers = new OtherPlayerBuilder(teacheresSprite, display);
-    enemys = new EnemyBuilder(enemysSprite, display);
+    otherPlayers = new OtherPlayerBuilder(teacheresSprites[i], display);
+    enemys = new EnemyBuilder(display);
     setSocketEvent();
 }
-var time = new Date().getTime(), fps = 60;
-function run() {
+var time = new Date().getTime(), fps = 50;
+function _run() {
     var _time = new Date().getTime();
     fps = 1000 / (_time - time);
     time = _time;
     update();
     render();
-    window.setTimeout(run, 1000 / 60);
+    window.setTimeout(_run, 1000 / 60);
 }
+var run = (function () {
+    var loops = 0;
+    var skipTicks = 1000 / fps;
+    var maxFrameSkip = 10;
+    var nextGameTick = Date.now();
+    return function () {
+        loops = 0;
+        while (Date.now() > nextGameTick && loops < maxFrameSkip) {
+            update();
+            nextGameTick += skipTicks;
+            loops++;
+        }
+        render();
+    };
+})();
+var _intervalId = setInterval(run, 0);
 var isPlay = true;
 function update() {
     ++display.frame;

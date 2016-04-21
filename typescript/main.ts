@@ -6,6 +6,7 @@
 /// <reference path="Player.ts" />
 /// <reference path="OtherPlayer.ts" />
 /// <reference path="Enemy.ts" />
+/// <reference path="Usagi.ts" />
 
 let display = new Screens(
     <HTMLCanvasElement>document.getElementById('canvas'),
@@ -13,35 +14,40 @@ let display = new Screens(
 );
 let socket = io.connect();
 
-let teacheresSprite;
-let enemysSprite;
+let teacheresSprites = [];
+let piyoSprite;
+let usagiSprite;
 
+// コールバック地獄！ 後で直す
 imageLoad('sprite.png', function () {
-    teacheresSprite = [
-        new Sprite(this, 0, 0, 60, 100),
-        new Sprite(this, 60, 0, 60, 100),
-        new Sprite(this, 120, 0, 60, 100)
-        // new Sprite(this, 0, 0, 60, 104),
-        // new Sprite(this, 60, 0, 60, 104),
-        // new Sprite(this, 120, 0, 60, 104)
+    teacheresSprites[0] = [
+        new Sprite(this, 0, 0, 60, 104),
+        new Sprite(this, 64, 0, 60, 104),
+        new Sprite(this, 128, 0, 60, 104)
+    ];
+    teacheresSprites[1] = [
+        new Sprite(this, 0, 108, 60, 104),
+        new Sprite(this, 64, 108, 60, 104),
+        new Sprite(this, 128, 108, 60, 104)
     ];
 
-    // imageLoad('enemy.png', function () {
-    //     enemysSprite = [
-    //         // new Sprite(this, 14, 0, 96 - 28, 96),
-    //         new Sprite(this, 96 + 14, 0, 96 - 28, 96),
-    //         new Sprite(this, 96 * 2 + 14, 0, 96 - 28, 96),
-    //         new Sprite(this, 96 * 3 + 14, 0, 96 - 28, 96)
-    //     ];
-    imageLoad('usagi.png', function () {
-        enemysSprite = [
-            new Sprite(this, 0, 0, 90, 171),
-            new Sprite(this, 90, 0, 90, 171),
-            // new Sprite(this, 200, 0, 100, 180)
+    imageLoad('enemy.png', function () {
+        piyoSprite = [
+            // new Sprite(this, 14, 0, 96 - 28, 96),
+            new Sprite(this, 96 + 14, 0, 96 - 28, 96),
+            new Sprite(this, 96 * 2 + 14, 0, 96 - 28, 96),
+            new Sprite(this, 96 * 3 + 14, 0, 96 - 28, 96)
         ];
         
-        init();
-        run();
+        imageLoad('usagi.png', function () {
+            usagiSprite = [
+                new Sprite(this, 0, 0, 90, 171),
+                new Sprite(this, 90, 0, 90, 171)
+            ];
+
+            init();
+            run();
+        });
     });
 });
 
@@ -57,19 +63,20 @@ let otherPlayers: OtherPlayerBuilder;
 let enemys: EnemyBuilder;
 
 function init() {
-    player = new Player(teacheresSprite, display);
+    let i = Math.random() * 2 | 0
+    player = new Player(teacheresSprites[i], display);
     player.control.setInputHandeler(player, socket, document.getElementById('touch-keyboard'));
 
-    otherPlayers = new OtherPlayerBuilder(teacheresSprite, display);
-    enemys = new EnemyBuilder(enemysSprite, display);
+    otherPlayers = new OtherPlayerBuilder(teacheresSprites[i], display);
+    enemys = new EnemyBuilder(display);
 
     setSocketEvent();
 }
 
 let time = new Date().getTime(),
-    fps = 60;
+    fps = 50;
 
-function run() {
+function _run() {
     let _time = new Date().getTime();
 
     fps = 1000 / (_time - time);
@@ -78,9 +85,31 @@ function run() {
     update();
     render();
 
-    window.setTimeout(run, 1000 / 60);
+    window.setTimeout(_run, 1000 / 60);
     // animationFrame(run);
 }
+let run = (function() {
+    var loops = 0;
+    var skipTicks = 1000 / fps;
+    var maxFrameSkip = 10;
+    var nextGameTick = Date.now();
+
+    return function() {
+        loops = 0;
+
+        while (Date.now() > nextGameTick && loops < maxFrameSkip) {
+            update();
+            nextGameTick += skipTicks;
+            loops++;
+        }
+
+        render();
+    };
+})();
+
+// Start the game loop
+let _intervalId = setInterval(run, 0);
+
 let isPlay = true;
 
 function update() {
@@ -162,7 +191,7 @@ function ElementRequestFullscreen(element) {
         "mozRequestFullScreen",
         "msRequestFullscreen"
     ];
-    
+
     for (let i = 0, num = list.length; i < num; i++) {
         if (element[list[i]]) {
             element[list[i]]();

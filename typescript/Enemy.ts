@@ -1,7 +1,8 @@
 /// <reference path="Chara.ts" />
-/// <reference path="Player.ts" />
 
 class Enemy extends Chara {
+    spritesLen: number;
+    
     isAddedPoint = false;
     point = 50;
     pointPosition: {
@@ -16,6 +17,8 @@ class Enemy extends Chara {
 
         this.position.x = screen.width;
         this.position.y = this.screenBottom;
+        
+        this.spritesLen = sprites.length;
     }
     update() {
         this.position.x -= 4;
@@ -66,7 +69,7 @@ class Enemy extends Chara {
         //     this.spriteIndex = (this.spriteIndex + 1) % 3;
         // }
         if (this.screen.frame % 20 === 0) {
-            this.spriteIndex = (this.spriteIndex + 1) % 2;
+            this.spriteIndex = (this.spriteIndex + 1) % this.spritesLen;
         }
     }
     isHit(chara: Chara): boolean {
@@ -91,10 +94,13 @@ class Enemy extends Chara {
 class EnemyBuilder {
     list: Enemy[] = [];
 
-    constructor(public sprites: Sprite[], public screen: Screens) { }
+    constructor(public screen: Screens) { }
 
-    add() {
-        this.list.push(new Enemy(this.sprites, this.screen));
+    add(name = 'Usagi') {
+        if(display.frame % 2) {
+            name = 'Piyo';
+        }
+        this.list.push(new window[name](this.screen));
     }
     remove(n: number) {
         this.list.splice(n, 1);
