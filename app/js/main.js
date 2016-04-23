@@ -568,10 +568,11 @@ var Ae = (function (_super) {
     __extends(Ae, _super);
     function Ae(screens) {
         _super.call(this, sprites.ae, screens);
+        this.speed = 1.5;
         this.count = 0;
     }
     Ae.prototype.move = function () {
-        this.position.x -= 1;
+        _super.prototype.move.call(this);
         if (this.position.y >= this.screenBottom) {
             this.position.y = this.screenBottom;
             if (++this.count > 30) {

@@ -17,12 +17,13 @@ class Ps extends Enemy {
     }
 }
 class Ae extends Enemy {
+    speed = 1.5;
     private count = 0;
     constructor(screens: Game) {
         super(sprites.ae, screens);
     }
     move() {
-        this.position.x -= 1;
+        super.move();
 
         if (this.position.y >= this.screenBottom) {
             this.position.y = this.screenBottom;
