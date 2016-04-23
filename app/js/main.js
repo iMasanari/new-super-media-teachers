@@ -144,12 +144,14 @@ var CharaControler = (function () {
                 socket.emit('inputStart', {
                     keyCode: keyCode,
                     position: {
-                        position: player.position
+                        position: {
+                            x: player.position.x | 0,
+                            y: player.position.y | 0,
+                            sx: (player.position.sx * 100 | 0) / 100,
+                            sy: (player.position.sy * 100 | 0) / 100
+                        }
                     }
                 });
-            }
-            if (e.target.classList) {
-                e.target.classList.add('js-hover');
             }
         };
         var inputEnd = function (e) {
@@ -158,11 +160,13 @@ var CharaControler = (function () {
             if (socket) {
                 socket.emit('inputEnd', {
                     keyCode: keyCode,
-                    position: player.position
+                    position: {
+                        x: player.position.x | 0,
+                        y: player.position.y | 0,
+                        sx: (player.position.sx * 100 | 0) / 100,
+                        sy: (player.position.sy * 100 | 0) / 100
+                    }
                 });
-            }
-            if (e.target.classList) {
-                e.target.classList.remove('js-hover');
             }
         };
         var inputReset = function () {
@@ -175,17 +179,54 @@ var CharaControler = (function () {
         };
         document.addEventListener("keydown", inputStart);
         document.addEventListener("keyup", inputEnd);
+        var inputNumber = null;
+        var touchInputStart = function (e) {
+            var target = e.target;
+            if (target.innerHTML === 'Jump') {
+                inputStart(e);
+            }
+            else {
+                var val = e.targetTouches[0];
+                var x = val.pageX - target.offsetLeft;
+                inputNumber = x < 166 ? 37 : 39;
+                inputStart(inputNumber);
+            }
+        };
+        var touchInputMove = function (e) {
+            var target = e.target;
+            if (target.innerHTML === 'Jump') {
+                inputStart(e);
+            }
+            else {
+                var val = e.targetTouches[0];
+                var x = val.pageX - target.offsetLeft;
+                var _inputNumber = x < 166 ? 37 : 39;
+                if (inputNumber !== _inputNumber) {
+                    inputNumber = _inputNumber;
+                    inputStart(_inputNumber);
+                    inputEnd(x > 166 ? 37 : 39);
+                }
+            }
+        };
+        var touchInputEnd = function (e) {
+            var target = e.target;
+            if (target.innerHTML === 'Jump') {
+                inputEnd(e);
+            }
+            else {
+                inputEnd(37);
+                inputEnd(39);
+            }
+        };
         window.addEventListener('blur', inputReset);
         if (touchKeyboard) {
             if ('ontouchstart' in window) {
-                touchKeyboard.addEventListener('touchstart', inputStart, false);
-                touchKeyboard.addEventListener('touchend', inputEnd, false);
-                touchKeyboard.addEventListener('touchcancel', inputEnd, false);
+                touchKeyboard.addEventListener('touchstart', touchInputStart, false);
+                touchKeyboard.addEventListener('touchmove', touchInputMove, false);
+                touchKeyboard.addEventListener('touchend', touchInputEnd, false);
+                touchKeyboard.addEventListener('touchcancel', touchInputEnd, false);
             }
             else {
-                touchKeyboard.addEventListener('mousedown', inputStart, false);
-                touchKeyboard.addEventListener('mouseup', inputEnd, false);
-                touchKeyboard.addEventListener('mouseout', inputEnd, false);
             }
         }
     };
@@ -238,6 +279,11 @@ var Player = (function (_super) {
             else {
                 this.isFly = true;
                 this.position.sy = -9;
+            }
+        }
+        if (this.control.isDown(40)) {
+            if (this.isFly) {
+                this.position.sy += 0.2;
             }
         }
     };
@@ -388,9 +434,12 @@ var Enemy = (function (_super) {
         this.spritesLen = sprites.length;
     }
     Enemy.prototype.update = function () {
-        this.position.x -= this.speed;
+        this.move();
         this.pointCheck();
         this.updateSprite();
+    };
+    Enemy.prototype.move = function () {
+        this.position.x -= this.speed;
     };
     Enemy.prototype.pointCheck = function () {
         var _this = this;
@@ -463,12 +512,7 @@ var EnemyBuilder = (function () {
         for (var i = 0, enemy = void 0; enemy = this.list[i]; ++i) {
             enemy.update();
             if (enemy.isHit(player)) {
-                player.sprites = sprites.teacher[Math.random() * 3 | 0];
-                player.width = player.sprites[0].width;
-                player.height = player.sprites[0].height;
-                player.screenLeft = player.screen.width - player.width;
-                player.screenBottom = player.screen.height - player.height - 100;
-                player.r = Math.min(player.width, player.height) / 2 - 2;
+                player.sprites = sprites.teacher[Math.random() * 2 | 0];
                 player.position = {
                     x: 0,
                     y: 0,
@@ -520,19 +564,36 @@ var Ps = (function (_super) {
     }
     return Ps;
 }(Enemy));
+var Ae = (function (_super) {
+    __extends(Ae, _super);
+    function Ae(screens) {
+        _super.call(this, sprites.ae, screens);
+        this.count = 0;
+    }
+    Ae.prototype.move = function () {
+        this.position.x -= 1;
+        if (this.position.y >= this.screenBottom) {
+            this.position.y = this.screenBottom;
+            if (++this.count > 30) {
+                this.count = 0;
+                this.position.sy = -10;
+                this.position.y += this.position.sy;
+            }
+        }
+        else {
+            this.position.sy += 0.2;
+            this.position.y += this.position.sy;
+        }
+    };
+    return Ae;
+}(Enemy));
 var Pr = (function (_super) {
     __extends(Pr, _super);
     function Pr(screens) {
         _super.call(this, sprites.pr, screens);
+        this.speed = 2;
     }
     return Pr;
-}(Enemy));
-var Ae = (function (_super) {
-    __extends(Ae, _super);
-    function Ae(screens) {
-        _super.call(this, sprites.Ae, screens);
-    }
-    return Ae;
 }(Enemy));
 var Piyo = (function (_super) {
     __extends(Piyo, _super);

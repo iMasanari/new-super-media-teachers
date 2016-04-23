@@ -20,6 +20,11 @@ class Player extends Chara {
                 this.position.sy = -9;
             }
         }
+        if (this.control.isDown(40)) {
+            if (this.isFly) {
+                this.position.sy += 0.2;
+            }
+        }
     }
     update() {
         this.move();

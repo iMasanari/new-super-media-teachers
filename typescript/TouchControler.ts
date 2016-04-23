@@ -1,11 +1,11 @@
 /// <reference path="CharaControler.ts" />
-/// <reference path="Screens.ts" />
+/// <reference path="Game.ts" />
 
 class TouchControler extends CharaControler {
     x: number;
     y: number;
 
-    constructor(public screen: Screens) {
+    constructor(public screen: Game) {
         super();
 
         this.x = 0;

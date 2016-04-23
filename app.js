@@ -54,12 +54,14 @@ io.sockets.on('connection', function (socket) {
 });
 
 var enemyList = [
-    'Piyo',
+    // 'Piyo',
+    'Ai',
+    'Ps',
     'Ai',
     'Ps',
     'Pr',
     'Ae',
-    'Usagi'
+    // 'Usagi'
 ],
     enemyListLen = enemyList.length;
     

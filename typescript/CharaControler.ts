@@ -49,20 +49,12 @@ class CharaControler {
         return false;
     }
     setInputHandeler(player: Player, socket, touchKeyboard: HTMLElement) {
-        // let touchKeyboardObject = {};
-
-        // if (touchKeyboard) {
-        //     let buttons = touchKeyboard.querySelectorAll('[data-key-code]');
-        //     for (let i = 0, val: HTMLElement; val = <HTMLElement>buttons[i]; ++i) {
-        //         touchKeyboardObject[val.dataset['keyCode']] = val;
-        //     }
-        // }
         if (socket) {
             socket.emit('add', {
                 position: player.position
             });
         }
-        let inputStart = (e: KeyboardEvent | TouchEvent) => {
+        let inputStart = (e: number | KeyboardEvent | TouchEvent) => {
             let keyCode = this.getKeyCode(e);
 
             this.inputStart(keyCode);
@@ -72,19 +64,20 @@ class CharaControler {
                     keyCode: keyCode,
                     // id: socket.id, // サーバー側で追加
                     position: {
-                        position: player.position
+                        position: {
+                            x: player.position.x | 0,
+                            y: player.position.y | 0,
+                        sx: (player.position.sx * 100 | 0) / 100,
+                        sy: (player.position.sy * 100 | 0) / 100
+                        }
                     }
                 });
             }
-            if ((<HTMLElement>e.target).classList) {
-                (<HTMLElement>e.target).classList.add('js-hover');
-            }
-            // if (touchKeyboardObject[keyCode]) {
-            //     touchKeyboardObject[keyCode].classList.add('js-hover');
+            // if ((<HTMLElement>e.target).classList) {
+            //     (<HTMLElement>e.target).classList.add('js-hover');
             // }
-
         };
-        let inputEnd = (e: KeyboardEvent | TouchEvent) => {
+        let inputEnd = (e: number | KeyboardEvent | TouchEvent) => {
             let keyCode = this.getKeyCode(e);
 
             this.inputEnd(keyCode);
@@ -92,21 +85,23 @@ class CharaControler {
             if (socket) {
                 socket.emit('inputEnd', {
                     keyCode: keyCode,
-                    position: player.position
+                    position: {
+                        x: player.position.x | 0,
+                        y: player.position.y | 0,
+                        sx: (player.position.sx * 100 | 0) / 100,
+                        sy: (player.position.sy * 100 | 0) / 100
+                    }
                 });
             }
-            if ((<HTMLElement>e.target).classList) {
-                (<HTMLElement>e.target).classList.remove('js-hover');
-            }
-            // if (touchKeyboardObject[keyCode]) {
-            //     touchKeyboardObject[keyCode].classList.remove('js-hover');
+            // if ((<HTMLElement>e.target).classList) {
+            //     (<HTMLElement>e.target).classList.remove('js-hover');
             // }
         };
         let inputReset = () => {
             this.down = {};
             this._down = {};
             this.pressed = {};
-            
+
             if (socket) {
                 socket.emit('remove');
             }
@@ -115,17 +110,60 @@ class CharaControler {
         document.addEventListener("keydown", inputStart);
         document.addEventListener("keyup", inputEnd);
 
+        let inputNumber: number = null;
+        let touchInputStart = (e: TouchEvent) => {
+            let target = <HTMLElement>e.target;
+            if (target.innerHTML === 'Jump') {
+                inputStart(e);
+            } else {
+                let val = e.targetTouches[0];
+                let x = val.pageX - target.offsetLeft;
+
+                inputNumber = x < 166 ? 37 : 39;
+                inputStart(inputNumber);
+            }
+        }
+        let touchInputMove = (e: TouchEvent) => {
+            let target = <HTMLElement>e.target;
+            if (target.innerHTML === 'Jump') {
+                inputStart(e);
+            } else {
+                // for (let i = 0, val: Touch; val = e.targetTouches[i]; ++i) {
+                let val = e.targetTouches[0];
+                let x = val.pageX - target.offsetLeft;
+
+                let _inputNumber = x < 166 ? 37 : 39;
+
+                if (inputNumber !== _inputNumber) {
+                    inputNumber = _inputNumber;
+
+                    inputStart(_inputNumber);
+                    inputEnd(x > 166 ? 37 : 39);
+                }
+                // }
+            }
+        }
+        let touchInputEnd = (e: TouchEvent) => {
+            let target = <HTMLElement>e.target;
+            if (target.innerHTML === 'Jump') {
+                inputEnd(e);
+            } else {
+                inputEnd(37);
+                inputEnd(39);
+            }
+        }
+
         window.addEventListener('blur', inputReset)
         if (touchKeyboard) {
             if ('ontouchstart' in window) {
-                touchKeyboard.addEventListener('touchstart', inputStart, false);
-                touchKeyboard.addEventListener('touchend', inputEnd, false);
-                touchKeyboard.addEventListener('touchcancel', inputEnd, false);
-            }
-            else {
-                touchKeyboard.addEventListener('mousedown', inputStart, false);
-                touchKeyboard.addEventListener('mouseup', inputEnd, false);
-                touchKeyboard.addEventListener('mouseout', inputEnd, false);
+                touchKeyboard.addEventListener('touchstart', touchInputStart, false);
+                touchKeyboard.addEventListener('touchmove', touchInputMove, false);
+                touchKeyboard.addEventListener('touchend', touchInputEnd, false);
+                touchKeyboard.addEventListener('touchcancel', touchInputEnd, false);
+            } else {
+                // touchKeyboard.addEventListener('mousedown', inputStart, false);
+                // touchKeyboard.addEventListener('mouseup', inputEnd, false);
+                // touchKeyboard.addEventListener('mouseout', inputEnd, false);
             }
         }
     };
