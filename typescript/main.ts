@@ -32,49 +32,26 @@ imageLoad('sprite.png', function () {
         new Sprite(this, 128, 108, 60, 104)
     ];
 
-    imageLoad('enemy.png', function () {
-        sprites.piyo = [
-            // new Sprite(this, 14, 0, 96 - 28, 96),
-            new Sprite(this, 96 + 14, 0, 96 - 28, 96),
-            new Sprite(this, 96 * 2 + 14, 0, 96 - 28, 96),
-            new Sprite(this, 96 * 3 + 14, 0, 96 - 28, 96)
+    imageLoad('adobe.png', function () {
+        sprites.ai = [
+            new Sprite(this, 0, 0, 60, 100),
+            new Sprite(this, 64, 0, 60, 100)
+        ];
+        sprites.ps = [
+            new Sprite(this, 0, 108, 60, 100),
+            new Sprite(this, 64, 108, 60, 100)
+        ];
+        sprites.pr = [
+            new Sprite(this, 0, 216, 60, 100),
+            new Sprite(this, 64, 216, 60, 100)
+        ];
+        sprites.ae = [
+            new Sprite(this, 0, 324, 60, 100),
+            new Sprite(this, 64, 324, 60, 100)
         ];
 
-        imageLoad('usagi.png', function () {
-            sprites.usagi = [
-                new Sprite(this, 0, 0, 90, 168),
-                new Sprite(this, 92, 0, 90, 168)
-            ];
-
-            imageLoad('adobe.png', function () {
-                sprites.ai = [
-                    new Sprite(this, 0, 0, 60, 100),
-                    new Sprite(this, 64, 0, 60, 100)
-                ];
-                sprites.ps = [
-                    new Sprite(this, 0, 108, 60, 100),
-                    new Sprite(this, 64, 108, 60, 100)
-                ];
-                sprites.pr = [
-                    new Sprite(this, 0, 216, 60, 100),
-                    new Sprite(this, 64, 216, 60, 100)
-                ];
-                sprites.ae = [
-                    new Sprite(this, 0, 324, 60, 100),
-                    new Sprite(this, 64, 324, 60, 100)
-                ];
-
-                imageLoad('usagi-player.png', function () {
-                    sprites.teacher[2] = [
-                        new Sprite(this, 0, 0, 89, 168),
-                        new Sprite(this, 92, 0, 89, 168),
-                        new Sprite(this, 186, 0, 89, 168)
-                    ];
-                    init();
-                    display.run();
-                });
-            });
-        });
+        init();
+        display.run();
     });
 });
 
@@ -89,20 +66,52 @@ let player: Player;
 let otherPlayers: OtherPlayerBuilder;
 let enemys: EnemyBuilder;
 
-function init() {
-    let i = Math.random() * 2 | 0
-    player = new Player(sprites.teacher[i], display);
-    player.control.setInputHandeler(player, socket, document.getElementById('touch-keyboard'));
+let isPlay = false;
 
-    otherPlayers = new OtherPlayerBuilder(sprites.teacher[i], display);
+function init() {
+    player = new Player(sprites.teacher[0], display);
+    player.position.y = -100;
+
+    otherPlayers = new OtherPlayerBuilder(sprites.teacher[0], display);
     enemys = new EnemyBuilder(display);
 
     setSocketEvent();
+    document.getElementById('play').removeAttribute('disabled');
 }
 
-let time = Date.now();
+let gameOption = document.getElementById('game-option');
 
-let isPlay = true;
+gameOption.addEventListener('touchstert', function (e) { e.stopPropagation(); }, true);
+gameOption.addEventListener('touchmove', function (e) { e.stopPropagation(); }, true);
+gameOption.addEventListener('touchend', function (e) { e.stopPropagation(); }, true);
+
+document.getElementById('play').addEventListener('click', function () {
+    let charaNumber = getCheckedRadio('chara'),
+        teamrNumber = getCheckedRadio('team');
+    
+    if (charaNumber == null || teamrNumber == null) {
+        return;
+    }
+    
+    player.sprites = sprites.teacher[charaNumber];
+    isPlay = true;
+    player.control.setInputHandeler(player, socket, document.getElementById('touch-keyboard'));
+    
+    gameOption.style.display = 'none';
+    enemys.list = [];
+}, false);
+
+function getCheckedRadio(name: string | NodeListOf<HTMLInputElement>) {
+    let nodelist = (typeof name === 'string') ?
+        <NodeListOf<HTMLInputElement>>document.getElementsByName(name) : name;
+
+    for (let i = 0, val: HTMLInputElement; val = nodelist[i]; ++i) {
+        if (val.checked) {
+            return val.value;
+        }
+    }
+    return null;
+}
 
 function update() {
     ++display.frame;
@@ -120,6 +129,7 @@ function render() {
     let ctx = display.ctx,
         y = display.height - 100;
 
+    ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(0, y);
     ctx.lineTo(display.width, y);
@@ -197,3 +207,4 @@ interface socketData {
     keyCode: number,
     position: Chara.Position
 }
+

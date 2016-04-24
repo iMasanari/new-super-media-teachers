@@ -4,7 +4,7 @@
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta charset="utf-8">
-    <title>Game</title>
+    <title>New SUPER MEDHIA TEACHERS</title>
     <meta name="description" content="">
     <meta name="author" content="">
     <meta name="viewport" content="width=500,user-scalable=no">
@@ -13,18 +13,76 @@
 </head>
 
 <body>
-    <canvas id="canvas" class="canvas"></canvas>
-    <!--<div id="canvas" class="canvas">
-        <div class="tile"></div>
-    </div>-->
-    <div id="touch-keyboard" class="touch-keyboard">
-        <span class="button">Left - Right</span>
-        <span class="button" data-key-code="38">Jump</span>
+    <div class="game-wapper">
+        <canvas id="canvas" class="canvas"></canvas>
+        <div id="game-option" class="game-option" style="">
+            <div id="html-top">
+                <h1>
+                    New SUPER<br>
+                    MEDHIA TEACHERS
+                </h1>
+                <!--<p class="button">タップしてスタート</p>-->
+            </div>
+            <div id="html-team-select">
+                <p>じぶんのチームと、つかう<br>キャラクターをえらんでください</p>
+                <ul class="list">
+                    <li>
+                        <label>
+                    <input type="radio" name="team" value="0">あかいろ
+                </label>
+                    </li>
+                    <li>
+                        <label>
+                    <input type="radio" name="team" value="1">あおいろ
+                </label>
+                    </li>
+                    <li>
+                        <label>
+                    <input type="radio" name="team" value="2">みどりいろ
+                </label>
+                    </li>
+                    <li>
+                        <label>
+                    <input type="radio" name="team" value="3">きいろ
+                </label>
+                    </li>
+                    <li>
+                        <label>
+                    <input type="radio" name="team" value="4">しろいろ
+                </label>
+                    </li>
+                    <li>
+                        <label>
+                    <input type="radio" name="team" value="5">くろいろ
+                </label>
+                    </li>
+                </ul>
+                <!--<div class="button disabled">けってい</div>-->
+            </div>
+            <div>
+                <!--<p>つかうキャラクターをえらんでください</p>-->
+                <ul class="list">
+                    <li>
+                        <label>
+                    <input type="radio" name="chara" value="0">つだ さん
+                </label>
+                    </li>
+                    <li>
+                        <label>
+                    <input type="radio" name="chara" value="1">たけうち さん
+                </label>
+                    </li>
+                </ul>
+                <div class="button" disabled="disabled" id="play">けってい</div>
+            </div>
+        </div>
     </div>
-    <p>
-        敵キャラはランダム出現のため、詰みパターンが存在する可能性があります
-    </p>
-    <p style="display: none";>
+    <div id="touch-keyboard" class="touch-keyboard" style="display: none;">
+        <span class="button keypad">Left &lt; - &gt; Right</span>
+        <span class="button jump">Jump</span>
+    </div>
+    （チームの色分けはまだ実装していません）
+    <p style="display: none;">
         <span class="button" id="fullscreen">Fullscreen (pc only)</span>
     </p>
 

@@ -1,20 +1,39 @@
+@font-face {
+    font-family: '8x8';
+  src: url('8dot.woff') format('woff'),
+       url('8dot.ttf') format('truetype');
+}
+
 html,
 body {
     padding: 0;
     margin: 0;
     -webkit-user-select: none;
+    font-family: '8x8';
+    font-size: 20px;
     /*user-select: none;*/
 }
 
-.canvas {
-    overflow: hidden;
+.game-wapper {
     position: relative;
+    height: 500px;
+}
+.canvas {
+    position: absolute;
+    top: 0;
     box-sizing: border-box;
     width: 500px;
     height: 500px;
     border: 1px solid #ddd;
-    /*perspective-origin: center center;
-    perspective: 500px;*/
+}
+.game-option {
+    position: absolute;
+    top: 0;
+    z-index: 10;
+    box-sizing: border-box;
+    width: 500px;
+    height: 500px;
+    padding: 0 1em;
 }
 
 .touch-keyboard {
@@ -23,16 +42,17 @@ body {
 }
 
 .button {
+    padding: 1em;
     border: 1px solid #ddd;
     border-radius: 5px;
     text-align: center;
+    background: #fff;
 }
 
-/*.button:active,*/
-.button.js-hover {
+/*.button:active {
     color: #fff;
     background-color: #ddd
-}
+}*/
 
 .touch-keyboard > .button {
     display: table-cell;
@@ -40,14 +60,13 @@ body {
     vertical-align: middle;
 }
 
-#stop {
-    margin: 10px;
-    padding: 5px;
-    width: 100px;
-}
 #canvas:-webkit-full-screen {
     width: auto;
     height: auto;
     min-width: 100%;
     min-height: 100%;
+}
+
+.list {
+    list-style: none;
 }

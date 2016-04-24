@@ -67,8 +67,8 @@ class CharaControler {
                         position: {
                             x: player.position.x | 0,
                             y: player.position.y | 0,
-                        sx: (player.position.sx * 100 | 0) / 100,
-                        sy: (player.position.sy * 100 | 0) / 100
+                            sx: (player.position.sx * 100 | 0) / 100,
+                            sy: (player.position.sy * 100 | 0) / 100
                         }
                     }
                 });
@@ -110,51 +110,51 @@ class CharaControler {
         document.addEventListener("keydown", inputStart);
         document.addEventListener("keyup", inputEnd);
 
-        let inputNumber: number = null;
+        let keypadNumber: number = null;
         let touchInputStart = (e: TouchEvent) => {
             let target = <HTMLElement>e.target;
-            if (target.innerHTML === 'Jump') {
-                inputStart(e);
-            } else {
+
+            if (target.classList.contains('jump')) {
+                inputStart(38);
+            } else if (target.classList.contains('keypad')) {
                 let val = e.targetTouches[0];
                 let x = val.pageX - target.offsetLeft;
 
-                inputNumber = x < 166 ? 37 : 39;
-                inputStart(inputNumber);
+                keypadNumber = x < 166 ? 37 : 39;
+                inputStart(keypadNumber);
             }
         }
         let touchInputMove = (e: TouchEvent) => {
             let target = <HTMLElement>e.target;
-            if (target.innerHTML === 'Jump') {
-                inputStart(e);
-            } else {
+            if (target.classList.contains('jump')) {
+                inputStart(38);
+            } else if (target.classList.contains('keypad')) {
                 // for (let i = 0, val: Touch; val = e.targetTouches[i]; ++i) {
                 let val = e.targetTouches[0];
                 let x = val.pageX - target.offsetLeft;
 
-                let _inputNumber = x < 166 ? 37 : 39;
+                let _keypadNumber = (x < 166 ? 37 : 39);
 
-                if (inputNumber !== _inputNumber) {
-                    inputNumber = _inputNumber;
-
-                    inputStart(_inputNumber);
-                    inputEnd(x > 166 ? 37 : 39);
+                if (keypadNumber !== _keypadNumber) {
+                    inputEnd(keypadNumber);
+                    inputStart(keypadNumber = _keypadNumber);
                 }
                 // }
             }
         }
         let touchInputEnd = (e: TouchEvent) => {
             let target = <HTMLElement>e.target;
-            if (target.innerHTML === 'Jump') {
-                inputEnd(e);
-            } else {
-                inputEnd(37);
-                inputEnd(39);
+            if (target.classList.contains('jump')) {
+                inputEnd(38);
+            } else if (target.classList.contains('keypad')) {
+                inputEnd(keypadNumber);
             }
         }
 
         window.addEventListener('blur', inputReset)
         if (touchKeyboard) {
+            touchKeyboard.style.display = null;
+            
             if ('ontouchstart' in window) {
                 touchKeyboard.addEventListener('touchstart', touchInputStart, false);
                 touchKeyboard.addEventListener('touchmove', touchInputMove, false);

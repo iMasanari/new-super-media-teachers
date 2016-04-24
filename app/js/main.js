@@ -179,47 +179,46 @@ var CharaControler = (function () {
         };
         document.addEventListener("keydown", inputStart);
         document.addEventListener("keyup", inputEnd);
-        var inputNumber = null;
+        var keypadNumber = null;
         var touchInputStart = function (e) {
             var target = e.target;
-            if (target.innerHTML === 'Jump') {
-                inputStart(e);
+            if (target.classList.contains('jump')) {
+                inputStart(38);
             }
-            else {
+            else if (target.classList.contains('keypad')) {
                 var val = e.targetTouches[0];
                 var x = val.pageX - target.offsetLeft;
-                inputNumber = x < 166 ? 37 : 39;
-                inputStart(inputNumber);
+                keypadNumber = x < 166 ? 37 : 39;
+                inputStart(keypadNumber);
             }
         };
         var touchInputMove = function (e) {
             var target = e.target;
-            if (target.innerHTML === 'Jump') {
-                inputStart(e);
+            if (target.classList.contains('jump')) {
+                inputStart(38);
             }
-            else {
+            else if (target.classList.contains('keypad')) {
                 var val = e.targetTouches[0];
                 var x = val.pageX - target.offsetLeft;
-                var _inputNumber = x < 166 ? 37 : 39;
-                if (inputNumber !== _inputNumber) {
-                    inputNumber = _inputNumber;
-                    inputStart(_inputNumber);
-                    inputEnd(x > 166 ? 37 : 39);
+                var _keypadNumber = (x < 166 ? 37 : 39);
+                if (keypadNumber !== _keypadNumber) {
+                    inputEnd(keypadNumber);
+                    inputStart(keypadNumber = _keypadNumber);
                 }
             }
         };
         var touchInputEnd = function (e) {
             var target = e.target;
-            if (target.innerHTML === 'Jump') {
-                inputEnd(e);
+            if (target.classList.contains('jump')) {
+                inputEnd(38);
             }
-            else {
-                inputEnd(37);
-                inputEnd(39);
+            else if (target.classList.contains('keypad')) {
+                inputEnd(keypadNumber);
             }
         };
         window.addEventListener('blur', inputReset);
         if (touchKeyboard) {
+            touchKeyboard.style.display = null;
             if ('ontouchstart' in window) {
                 touchKeyboard.addEventListener('touchstart', touchInputStart, false);
                 touchKeyboard.addEventListener('touchmove', touchInputMove, false);
@@ -295,10 +294,10 @@ var Player = (function (_super) {
     Player.prototype.display = function () {
         var ctx = this.screen.ctx;
         _super.prototype.display.call(this);
-        ctx.font = '50px sans-serif';
+        ctx.font = '50px "8x8", sans-serif';
         ctx.textAlign = 'right';
         ctx.fillText(this.point.toFixed(0), 500 - 10, 50);
-        ctx.font = '25px sans-serif';
+        ctx.font = '25px "8x8", sans-serif';
         ctx.fillText('MAX: ' + Math.max(this.maxPoint, this.point), 500 - 200, 40);
     };
     Player.prototype.setPosition = function (target) {
@@ -463,16 +462,13 @@ var Enemy = (function (_super) {
         }
         else if (this.pointPosition && this.pointPosition.opacity) {
             var ctx = this.screen.ctx;
-            ctx.font = '30px sans-serif';
+            ctx.font = '30px "8x8", sans-serif';
             ctx.textAlign = 'center';
             ctx.globalAlpha = this.pointPosition.opacity / 100;
-            ctx.fillStyle = '#fff';
             this.pointPosition.opacity -= 5;
             ctx.fillText('+' + this.pointPosition.point, this.pointPosition.x, this.pointPosition.y);
-            ctx.strokeText('+' + this.pointPosition.point, this.pointPosition.x, this.pointPosition.y);
             this.pointPosition.y += -3;
             ctx.globalAlpha = 1;
-            ctx.fillStyle = '#000';
         }
     };
     Enemy.prototype.updateSprite = function () {
@@ -512,7 +508,6 @@ var EnemyBuilder = (function () {
         for (var i = 0, enemy = void 0; enemy = this.list[i]; ++i) {
             enemy.update();
             if (enemy.isHit(player)) {
-                player.sprites = sprites.teacher[Math.random() * 2 | 0];
                 player.position = {
                     x: 0,
                     y: 0,
@@ -528,6 +523,7 @@ var EnemyBuilder = (function () {
                         position: player.position
                     });
                 }
+                break;
             }
             else if (enemy.isDead()) {
                 this.remove(i--);
@@ -621,45 +617,25 @@ imageLoad('sprite.png', function () {
         new Sprite(this, 64, 108, 60, 104),
         new Sprite(this, 128, 108, 60, 104)
     ];
-    imageLoad('enemy.png', function () {
-        sprites.piyo = [
-            new Sprite(this, 96 + 14, 0, 96 - 28, 96),
-            new Sprite(this, 96 * 2 + 14, 0, 96 - 28, 96),
-            new Sprite(this, 96 * 3 + 14, 0, 96 - 28, 96)
+    imageLoad('adobe.png', function () {
+        sprites.ai = [
+            new Sprite(this, 0, 0, 60, 100),
+            new Sprite(this, 64, 0, 60, 100)
         ];
-        imageLoad('usagi.png', function () {
-            sprites.usagi = [
-                new Sprite(this, 0, 0, 90, 168),
-                new Sprite(this, 92, 0, 90, 168)
-            ];
-            imageLoad('adobe.png', function () {
-                sprites.ai = [
-                    new Sprite(this, 0, 0, 60, 100),
-                    new Sprite(this, 64, 0, 60, 100)
-                ];
-                sprites.ps = [
-                    new Sprite(this, 0, 108, 60, 100),
-                    new Sprite(this, 64, 108, 60, 100)
-                ];
-                sprites.pr = [
-                    new Sprite(this, 0, 216, 60, 100),
-                    new Sprite(this, 64, 216, 60, 100)
-                ];
-                sprites.ae = [
-                    new Sprite(this, 0, 324, 60, 100),
-                    new Sprite(this, 64, 324, 60, 100)
-                ];
-                imageLoad('usagi-player.png', function () {
-                    sprites.teacher[2] = [
-                        new Sprite(this, 0, 0, 89, 168),
-                        new Sprite(this, 92, 0, 89, 168),
-                        new Sprite(this, 186, 0, 89, 168)
-                    ];
-                    init();
-                    display.run();
-                });
-            });
-        });
+        sprites.ps = [
+            new Sprite(this, 0, 108, 60, 100),
+            new Sprite(this, 64, 108, 60, 100)
+        ];
+        sprites.pr = [
+            new Sprite(this, 0, 216, 60, 100),
+            new Sprite(this, 64, 216, 60, 100)
+        ];
+        sprites.ae = [
+            new Sprite(this, 0, 324, 60, 100),
+            new Sprite(this, 64, 324, 60, 100)
+        ];
+        init();
+        display.run();
     });
 });
 function imageLoad(src, callback) {
@@ -670,16 +646,40 @@ function imageLoad(src, callback) {
 var player;
 var otherPlayers;
 var enemys;
+var isPlay = false;
 function init() {
-    var i = Math.random() * 2 | 0;
-    player = new Player(sprites.teacher[i], display);
-    player.control.setInputHandeler(player, socket, document.getElementById('touch-keyboard'));
-    otherPlayers = new OtherPlayerBuilder(sprites.teacher[i], display);
+    player = new Player(sprites.teacher[0], display);
+    player.position.y = -100;
+    otherPlayers = new OtherPlayerBuilder(sprites.teacher[0], display);
     enemys = new EnemyBuilder(display);
     setSocketEvent();
+    document.getElementById('play').removeAttribute('disabled');
 }
-var time = Date.now();
-var isPlay = true;
+var gameOption = document.getElementById('game-option');
+gameOption.addEventListener('touchstert', function (e) { e.stopPropagation(); }, true);
+gameOption.addEventListener('touchmove', function (e) { e.stopPropagation(); }, true);
+gameOption.addEventListener('touchend', function (e) { e.stopPropagation(); }, true);
+document.getElementById('play').addEventListener('click', function () {
+    var charaNumber = getCheckedRadio('chara'), teamrNumber = getCheckedRadio('team');
+    if (charaNumber == null || teamrNumber == null) {
+        return;
+    }
+    player.sprites = sprites.teacher[charaNumber];
+    isPlay = true;
+    player.control.setInputHandeler(player, socket, document.getElementById('touch-keyboard'));
+    gameOption.style.display = 'none';
+    enemys.list = [];
+}, false);
+function getCheckedRadio(name) {
+    var nodelist = (typeof name === 'string') ?
+        document.getElementsByName(name) : name;
+    for (var i = 0, val = void 0; val = nodelist[i]; ++i) {
+        if (val.checked) {
+            return val.value;
+        }
+    }
+    return null;
+}
 function update() {
     ++display.frame;
     display.clear();
@@ -693,6 +693,7 @@ function update() {
 }
 function render() {
     var ctx = display.ctx, y = display.height - 100;
+    ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(0, y);
     ctx.lineTo(display.width, y);

@@ -54,18 +54,15 @@ class Enemy extends Chara {
         } else if (this.pointPosition && this.pointPosition.opacity) {
             let ctx = this.screen.ctx;
 
-            ctx.font = '30px sans-serif';
+            ctx.font = '30px "8x8", sans-serif';
             ctx.textAlign = 'center';
             ctx.globalAlpha = this.pointPosition.opacity / 100;
-            ctx.fillStyle = '#fff';
 
             this.pointPosition.opacity -= 5;
 
             ctx.fillText('+' + this.pointPosition.point, this.pointPosition.x, this.pointPosition.y);
-            ctx.strokeText('+' + this.pointPosition.point, this.pointPosition.x, this.pointPosition.y);
             this.pointPosition.y += -3;
             ctx.globalAlpha = 1;
-            ctx.fillStyle = '#000';
         }
     }
     updateSprite() {
@@ -107,9 +104,8 @@ class EnemyBuilder {
         for (let i = 0, enemy: Enemy; enemy = this.list[i]; ++i) {
             enemy.update();
             if (enemy.isHit(player)) {
-
                 // おふざけ
-                player.sprites = sprites.teacher[Math.random() * 2 | 0];
+                // player.sprites = sprites.teacher[Math.random() * 2 | 0];
                 // player.width = player.sprites[0].width;
                 // player.height = player.sprites[0].height;
                 // player.screenLeft = player.screen.width - player.width;
@@ -132,7 +128,7 @@ class EnemyBuilder {
                         position: player.position
                     });
                 }
-                // this.remove(i--);
+                break;
             } else if (enemy.isDead()) {
                 this.remove(i--);
             }

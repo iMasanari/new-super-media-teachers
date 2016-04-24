@@ -35,10 +35,10 @@ class Player extends Chara {
         let ctx = this.screen.ctx;
 
         super.display();
-        ctx.font = '50px sans-serif';
+        ctx.font = '50px "8x8", sans-serif';
         ctx.textAlign = 'right';
         ctx.fillText(this.point.toFixed(0), 500 - 10, 50);
-        ctx.font = '25px sans-serif';
+        ctx.font = '25px "8x8", sans-serif';
         ctx.fillText('MAX: ' + Math.max(this.maxPoint, this.point), 500 - 200, 40);
     }
     setPosition(target = this.position) {
