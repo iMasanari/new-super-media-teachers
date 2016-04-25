@@ -16,23 +16,28 @@ let display = new Game(
 let socket = io.connect();
 
 let sprites: any = {
-    teacher: []
+    teacher: [
+        [], []
+    ]
 };
 
-// コールバック地獄！ 後で直す
-imageLoad('sprite.png', function () {
-    sprites.teacher[0] = [
-        new Sprite(this, 0, 0, 60, 104),
-        new Sprite(this, 64, 0, 60, 104),
-        new Sprite(this, 128, 0, 60, 104)
-    ];
-    sprites.teacher[1] = [
-        new Sprite(this, 0, 108, 60, 104),
-        new Sprite(this, 64, 108, 60, 104),
-        new Sprite(this, 128, 108, 60, 104)
-    ];
+imageLoad('img/mmddots.png', function () {
+    for (let i = 0; i < 6; ++i) {
+        sprites.teacher[0][i] = [
+            new Sprite(this, 0, 108 * i, 60, 104),
+            new Sprite(this, 64, 108 * i, 60, 104),
+            new Sprite(this, 128, 108 * i, 60, 104)
+        ];
+        sprites.teacher[1][i] = [
+            new Sprite(this, 192, 108 * i, 60, 104),
+            new Sprite(this, 256, 108 * i, 60, 104),
+            new Sprite(this, 320, 108 * i, 60, 104)
+        ];
+    }
+    
+    
 
-    imageLoad('adobe.png', function () {
+    imageLoad('img/adobe.png', function () {
         sprites.ai = [
             new Sprite(this, 0, 0, 60, 100),
             new Sprite(this, 64, 0, 60, 100)
@@ -69,10 +74,10 @@ let enemys: EnemyBuilder;
 let isPlay = false;
 
 function init() {
-    player = new Player(sprites.teacher[0], display);
+    player = new Player(sprites.teacher[0][0], display);
     player.position.y = -100;
 
-    otherPlayers = new OtherPlayerBuilder(sprites.teacher[0], display);
+    otherPlayers = new OtherPlayerBuilder(sprites.teacher[0][0], display);
     enemys = new EnemyBuilder(display);
 
     setSocketEvent();
@@ -86,15 +91,16 @@ gameOption.addEventListener('touchmove', function (e) { e.stopPropagation(); }, 
 gameOption.addEventListener('touchend', function (e) { e.stopPropagation(); }, true);
 
 document.getElementById('play').addEventListener('click', function () {
-    let charaNumber = getCheckedRadio('chara'),
+    let charaNumber = +getCheckedRadio('chara'),
         teamNumber = +getCheckedRadio('team');
 
     if (charaNumber == null || teamNumber == null) {
         return;
     }
 
-    player.sprites = sprites.teacher[charaNumber];
-    player.teamNumber = teamNumber
+    player.sprites = sprites.teacher[charaNumber][teamNumber];
+    player.teamNumber = teamNumber;
+    player.charaNumber = charaNumber;
     isPlay = true;
     player.control.setInputHandeler(player, socket, document.getElementById('touch-keyboard'));
 
@@ -146,16 +152,16 @@ function render() {
 
 function setSocketEvent() {
     socket.on('update', function (data: socketData) {
-        otherPlayers.getPlayer(data.id).sync(data.position);
+        otherPlayers.getPlayer(data.id, data).sync(data.position);
     });
     socket.on('inputStart', function (data: socketData) {
-        let otherPlayer = otherPlayers.getPlayer(data.id);
+        let otherPlayer = otherPlayers.getPlayer(data.id, data);
 
         otherPlayer.control.inputStart(data.keyCode);
         otherPlayer.sync(data.position);
     });
     socket.on('inputEnd', function (data: socketData) {
-        let otherPlayer = otherPlayers.getPlayer(data.id);
+        let otherPlayer = otherPlayers.getPlayer(data.id, data);
 
         otherPlayer.control.inputEnd(data.keyCode);
         otherPlayer.sync(data.position);
@@ -171,7 +177,7 @@ function setSocketEvent() {
         }
 
         if (data) {
-            otherPlayers.getPlayer(data.id).sync(data.position);
+            otherPlayers.getPlayer(data.id, data).sync(data.position);
         }
     });
     socket.on('remove', function (id: string) {

@@ -351,6 +351,16 @@ var Player = (function (_super) {
         }
         socket.emit(type, sendData);
     };
+    Player.prototype.getPoint = function (point) {
+        if (!isPlay)
+            return;
+        this.point += point;
+        socket.emit('point', {
+            team: this.teamNumber,
+            chara: this.charaNumber,
+            point: point
+        });
+    };
     return Player;
 }(_Player));
 var OtherPlayer = (function (_super) {
@@ -415,10 +425,12 @@ var OtherPlayerBuilder = (function () {
         this.screen = screen;
         this.players = {};
     }
-    OtherPlayerBuilder.prototype.getPlayer = function (id) {
+    OtherPlayerBuilder.prototype.getPlayer = function (id, createData) {
         var chara = this.players[id];
         if (!chara) {
-            return this.players[id] = new OtherPlayer(this.sprites, this.screen);
+            chara = this.players[id] = new OtherPlayer(this.sprites, this.screen);
+            chara.sprites = sprites.teacher[createData.chara][createData.team];
+            console.log(createData.chara, createData.team);
         }
         return chara;
     };
@@ -464,11 +476,7 @@ var Enemy = (function (_super) {
         if (!this.isAddedPoint) {
             if (player.position.x > this.position.x) {
                 var point = this.point * (1 + player.position.x / player.screenLeft) | 0;
-                socket.emit('addPoint', {
-                    team: player.teamNumber,
-                    point: point
-                });
-                player.point += point;
+                player.getPoint(point);
                 this.isAddedPoint = true;
                 this.pointPosition = {
                     point: point,
@@ -611,20 +619,24 @@ var Piyo = (function (_super) {
 var display = new Game(document.getElementById('canvas'), 500, 500);
 var socket = io.connect();
 var sprites = {
-    teacher: []
+    teacher: [
+        [], []
+    ]
 };
-imageLoad('sprite.png', function () {
-    sprites.teacher[0] = [
-        new Sprite(this, 0, 0, 60, 104),
-        new Sprite(this, 64, 0, 60, 104),
-        new Sprite(this, 128, 0, 60, 104)
-    ];
-    sprites.teacher[1] = [
-        new Sprite(this, 0, 108, 60, 104),
-        new Sprite(this, 64, 108, 60, 104),
-        new Sprite(this, 128, 108, 60, 104)
-    ];
-    imageLoad('adobe.png', function () {
+imageLoad('img/mmddots.png', function () {
+    for (var i = 0; i < 6; ++i) {
+        sprites.teacher[0][i] = [
+            new Sprite(this, 0, 108 * i, 60, 104),
+            new Sprite(this, 64, 108 * i, 60, 104),
+            new Sprite(this, 128, 108 * i, 60, 104)
+        ];
+        sprites.teacher[1][i] = [
+            new Sprite(this, 192, 108 * i, 60, 104),
+            new Sprite(this, 256, 108 * i, 60, 104),
+            new Sprite(this, 320, 108 * i, 60, 104)
+        ];
+    }
+    imageLoad('img/adobe.png', function () {
         sprites.ai = [
             new Sprite(this, 0, 0, 60, 100),
             new Sprite(this, 64, 0, 60, 100)
@@ -655,9 +667,9 @@ var otherPlayers;
 var enemys;
 var isPlay = false;
 function init() {
-    player = new Player(sprites.teacher[0], display);
+    player = new Player(sprites.teacher[0][0], display);
     player.position.y = -100;
-    otherPlayers = new OtherPlayerBuilder(sprites.teacher[0], display);
+    otherPlayers = new OtherPlayerBuilder(sprites.teacher[0][0], display);
     enemys = new EnemyBuilder(display);
     setSocketEvent();
     document.getElementById('play').removeAttribute('disabled');
@@ -667,12 +679,13 @@ gameOption.addEventListener('touchstert', function (e) { e.stopPropagation(); },
 gameOption.addEventListener('touchmove', function (e) { e.stopPropagation(); }, true);
 gameOption.addEventListener('touchend', function (e) { e.stopPropagation(); }, true);
 document.getElementById('play').addEventListener('click', function () {
-    var charaNumber = getCheckedRadio('chara'), teamNumber = +getCheckedRadio('team');
+    var charaNumber = +getCheckedRadio('chara'), teamNumber = +getCheckedRadio('team');
     if (charaNumber == null || teamNumber == null) {
         return;
     }
-    player.sprites = sprites.teacher[charaNumber];
+    player.sprites = sprites.teacher[charaNumber][teamNumber];
     player.teamNumber = teamNumber;
+    player.charaNumber = charaNumber;
     isPlay = true;
     player.control.setInputHandeler(player, socket, document.getElementById('touch-keyboard'));
     gameOption.style.display = 'none';
@@ -716,15 +729,15 @@ function render() {
 }
 function setSocketEvent() {
     socket.on('update', function (data) {
-        otherPlayers.getPlayer(data.id).sync(data.position);
+        otherPlayers.getPlayer(data.id, data).sync(data.position);
     });
     socket.on('inputStart', function (data) {
-        var otherPlayer = otherPlayers.getPlayer(data.id);
+        var otherPlayer = otherPlayers.getPlayer(data.id, data);
         otherPlayer.control.inputStart(data.keyCode);
         otherPlayer.sync(data.position);
     });
     socket.on('inputEnd', function (data) {
-        var otherPlayer = otherPlayers.getPlayer(data.id);
+        var otherPlayer = otherPlayers.getPlayer(data.id, data);
         otherPlayer.control.inputEnd(data.keyCode);
         otherPlayer.sync(data.position);
     });
@@ -738,7 +751,7 @@ function setSocketEvent() {
             });
         }
         if (data) {
-            otherPlayers.getPlayer(data.id).sync(data.position);
+            otherPlayers.getPlayer(data.id, data).sync(data.position);
         }
     });
     socket.on('remove', function (id) {

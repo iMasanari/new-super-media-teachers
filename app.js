@@ -37,21 +37,29 @@ io.sockets.on('connection', function (socket) {
     });
     socket.on('update', function (data) {
         data.id = socket.id;
-        socket.broadcast.emit('update', data);
+        io.to('test').emit('update', data);
+        // socket.broadcast.emit('update', data);
+    });
+    socket.on('join', function(roomName) {
+        socket.join(roomName);
     });
     socket.on('inputStart', function (data) {
         data.id = socket.id;
-        socket.broadcast.emit('inputStart', data);
+        io.to('test').emit('inputStart', data);
     });
     socket.on('inputEnd', function (data) {
         data.id = socket.id;
-        socket.broadcast.emit('inputEnd', data);
+        io.to('test').emit('inputEnd', data);
     });
     socket.on('request-enemy', function (name) {
         io.sockets.emit('addEnemy', name);
     });
     socket.on('auto-enemy', function (bool) {
         autoEnemy = bool;
+    });
+    socket.on('point', function (data) {
+        io.to('test').emit('point', data);
+        
     });
     socket.on('remove', remove);
     socket.on('disconnect', remove);

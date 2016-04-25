@@ -60,11 +60,13 @@ class OtherPlayerBuilder {
 
     constructor(public sprites: Sprite[], public screen: Game) { }
 
-    getPlayer(id: string) {
+    getPlayer(id: string, createData) {
         let chara = this.players[id];
 
         if (!chara) {
-            return this.players[id] = new OtherPlayer(this.sprites, this.screen);
+            chara = this.players[id] = new OtherPlayer(this.sprites, this.screen);
+            chara.sprites = sprites.teacher[createData.chara][createData.team];
+            console.log(createData.chara, createData.team);
         }
         return chara;
     }

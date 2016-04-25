@@ -36,12 +36,7 @@ class Enemy extends Chara {
             if (player.position.x > this.position.x) {
                 let point = this.point * (1 + player.position.x / player.screenLeft) | 0;
 
-                socket.emit('addPoint', {
-                    team: player.teamNumber,
-                    point: point
-                });
-                
-                player.point += point;
+                player.getPoint(point);
 
                 this.isAddedPoint = true;
                 this.pointPosition = {

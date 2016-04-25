@@ -75,7 +75,7 @@ body {
 .request-enemy {
     width: 60px;
     height: 104px;
-    background: url("../adobe.png") no-repeat;
+    background: url("../img/adobe.png") no-repeat;
 }
 .request-enemy-ai {
     background-position: 0 0;

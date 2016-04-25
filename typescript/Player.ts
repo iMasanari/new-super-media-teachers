@@ -72,7 +72,7 @@ class Player extends _Player {
     life = 999;
     display() {
         super.display();
-        
+
         let ctx = this.screen.ctx;
 
         ctx.font = '40px "8x8", sans-serif';
@@ -106,7 +106,7 @@ class Player extends _Player {
     }
     emit(type = 'update', data?: Object) {
         if (!socket) return;
-        
+
         let sendData = {
             team: this.teamNumber,
             chara: this.charaNumber,
@@ -123,5 +123,16 @@ class Player extends _Player {
         }
 
         socket.emit(type, sendData);
+    }
+    getPoint(point: number) {
+        if (!isPlay) return;
+
+        this.point += point;
+        
+        socket.emit('point', {
+            team: this.teamNumber,
+            chara: this.charaNumber,
+            point: point
+        });
     }
 }

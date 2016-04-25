@@ -99,13 +99,40 @@ var elms = document.getElementsByClassName('request-enemy');
 
 for (var i = 0, val; val = elms[i]; ++i) {
     val.addEventListener('click', function() {
-        // console.log(this.dataset.value)
         socket.emit('request-enemy', this.dataset.value);
     });
 }
 function setAutoEnemy(bool) {
     socket.emit('auto-enemy', bool);
 }
+
+socket.emit('join', 'test');
+
+var pointList = [{
+    name: 'あかいろ',
+    point: 0
+}, {
+    name: 'あおいろ',
+    point: 0
+}, {
+    name: 'みどりいろ',
+    point: 0
+}, {
+    name: 'きいろ',
+    point: 0
+}, {
+    name: 'しろいろ',
+    point: 0
+}, {
+    name: 'くろいろ',
+    point: 0
+}];
+
+socket.on('point', function(data) {
+    pointList[data.team].point += data.point;
+    console.log(pointList[data.team]);
+});
+
     </script>
 </body>
 
