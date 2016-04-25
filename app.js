@@ -28,6 +28,8 @@ console.log('Server running at http://localhost:' + port + '/');
 
 var io = require('socket.io').listen(app);
 
+var autoEnemy = true;
+
 io.sockets.on('connection', function (socket) {
     socket.on('add', function (data) {
         data.id = socket.id;
@@ -44,6 +46,12 @@ io.sockets.on('connection', function (socket) {
     socket.on('inputEnd', function (data) {
         data.id = socket.id;
         socket.broadcast.emit('inputEnd', data);
+    });
+    socket.on('request-enemy', function (name) {
+        io.sockets.emit('addEnemy', name);
+    });
+    socket.on('auto-enemy', function (bool) {
+        autoEnemy = bool;
     });
     socket.on('remove', remove);
     socket.on('disconnect', remove);
@@ -64,9 +72,11 @@ var enemyList = [
     // 'Usagi'
 ],
     enemyListLen = enemyList.length;
-    
+
 function addEnemy() {
-    io.sockets.emit('addEnemy', enemyList[Math.random() * enemyListLen | 0]);
+    if (autoEnemy) {
+        io.sockets.emit('addEnemy', enemyList[Math.random() * enemyListLen | 0]);
+    }
 }
 
 (function loop() {

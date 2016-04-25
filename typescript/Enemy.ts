@@ -36,6 +36,11 @@ class Enemy extends Chara {
             if (player.position.x > this.position.x) {
                 let point = this.point * (1 + player.position.x / player.screenLeft) | 0;
 
+                socket.emit('addPoint', {
+                    team: player.teamNumber,
+                    point: point
+                });
+                
                 player.point += point;
 
                 this.isAddedPoint = true;
@@ -45,10 +50,6 @@ class Enemy extends Chara {
                     y: this.position.y - 20,
                     opacity: 130
                 };
-
-                window.setTimeout(() => {
-                    this.pointPosition = null;
-                }, 1000);
 
             }
         } else if (this.pointPosition && this.pointPosition.opacity) {
@@ -104,30 +105,8 @@ class EnemyBuilder {
         for (let i = 0, enemy: Enemy; enemy = this.list[i]; ++i) {
             enemy.update();
             if (enemy.isHit(player)) {
-                // おふざけ
-                // player.sprites = sprites.teacher[Math.random() * 2 | 0];
-                // player.width = player.sprites[0].width;
-                // player.height = player.sprites[0].height;
-                // player.screenLeft = player.screen.width - player.width;
-                // player.screenBottom = player.screen.height - player.height - 100;
-                // player.r = Math.min(player.width, player.height) / 2 - 2;
-
-                player.position = {
-                    x: 0,
-                    y: 0,
-                    sx: 0,
-                    sy: 0
-                };
-                player.maxPoint = Math.max(player.point, player.maxPoint);
-                player.point = 0;
-                player.isFly = true;
+                player.dead();
                 this.list = [];
-
-                if (socket) {
-                    socket.emit('add', {
-                        position: player.position
-                    });
-                }
                 break;
             } else if (enemy.isDead()) {
                 this.remove(i--);

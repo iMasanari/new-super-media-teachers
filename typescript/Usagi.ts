@@ -25,9 +25,7 @@ class Ae extends Enemy {
     move() {
         super.move();
 
-        if (this.position.y >= this.screenBottom) {
-            this.position.y = this.screenBottom;
-
+        if (this.screenBottom <= this.position.y) {
             if (++this.count > 30) {
                 this.count = 0;
                 this.position.sy = -10;
@@ -36,6 +34,10 @@ class Ae extends Enemy {
         } else {
             this.position.sy += 0.2;
             this.position.y += this.position.sy;
+            
+            if (this.screenBottom < this.position.y) {
+                this.position.y = this.screenBottom;
+            }
         }
         // this.position.y += this.position.sy;
         // this.position.y = Math.min(this.position.y, this.screenBottom);

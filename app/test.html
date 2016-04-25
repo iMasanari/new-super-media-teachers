@@ -2,55 +2,111 @@
 <html>
 
 <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <title>New SUPER MEDHIA TEACHERS</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="viewport" content="width=500,user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
-    <div id="log"></div>
+    <div class="game-wapper">
+        <canvas id="canvas" class="canvas"></canvas>
+        <div id="game-option" class="game-option" style="display: none;">
+            <div id="html-top">
+                <h1>
+                    New SUPER<br>
+                    MEDHIA TEACHERS
+                </h1>
+                <!--<p class="button">タップしてスタート</p>-->
+            </div>
+            <div id="html-team-select">
+                <p>じぶんのチームと、つかう<br>キャラクターをえらんでください</p>
+                <ul class="list">
+                    <li>
+                        <label>
+                    <input type="radio" name="team" value="0">あかいろ
+                </label>
+                    </li>
+                    <li>
+                        <label>
+                    <input type="radio" name="team" value="1">あおいろ
+                </label>
+                    </li>
+                    <li>
+                        <label>
+                    <input type="radio" name="team" value="2">みどりいろ
+                </label>
+                    </li>
+                    <li>
+                        <label>
+                    <input type="radio" name="team" value="3">きいろ
+                </label>
+                    </li>
+                    <li>
+                        <label>
+                    <input type="radio" name="team" value="4">しろいろ
+                </label>
+                    </li>
+                    <li>
+                        <label>
+                    <input type="radio" name="team" value="5">くろいろ
+                </label>
+                    </li>
+                </ul>
+                <!--<div class="button disabled">けってい</div>-->
+            </div>
+            <div>
+                <!--<p>つかうキャラクターをえらんでください</p>-->
+                <ul class="list">
+                    <li>
+                        <label>
+                    <input type="radio" name="chara" value="0">つだ さん
+                </label>
+                    </li>
+                    <li>
+                        <label>
+                    <input type="radio" name="chara" value="1">たけうち さん
+                </label>
+                    </li>
+                </ul>
+                <div class="button" disabled="disabled" id="play">けってい</div>
+            </div>
+        </div>
+    </div>
+    <div id="touch-keyboard" class="touch-keyboard" style="display: none;">
+        <span class="button keypad">Left &lt; - &gt; Right</span>
+        <span class="button jump">Jump</span>
+    </div>
+    <p>
+        <span class="button" id="fullscreen">Fullscreen (pc only)</span>
+    </p>
+    <ul class="float-list">
+        <li class="request-enemy request-enemy-ai" data-value="Ai"></li>
+        <li class="request-enemy request-enemy-ps" data-value="Ps"></li>
+        <li class="request-enemy request-enemy-pr" data-value="Pr"></li>
+        <li class="request-enemy request-enemy-ae" data-value="Ae"></li>
+    </ul>
 
     <!-- scripts -->
+    <script src="socket.io/socket.io.js"></script>
+    <script src="js/main.js"></script>
     <script>
-var log = document.getElementById('log');
+var elms = document.getElementsByClassName('request-enemy');
 
-var animationFrame = (function () {
-    var list = [
-        'requestAnimationFrame',
-        'webkitRequestAnimationFrame',
-        'mozRequestAnimationFrame'
-    ];
-
-    for (var i = 0, val; val = list[i]; ++i) if (window[val]) {
-        return function (callback) {
-            window[val](callback.bind(this));
-        };
-    }
-
-    return function (callback) {
-        log.innerHTML = '計測失敗<br>requestAnimationFrameを使用できませんでした';
-        // window.setTimeout(function() {
-        //     callback(Date.now());
-        // }, 1000 / 60);
-    };
-})();
-
-var time = Date.now(),
-    count = 0,
-    ary = [];
-
-log.innerHTML = '計測中...';
-
-var loop = function (timestamp) {
-    var fps = 1000 / (timestamp - time)
-    ary.push(fps | 0);
-    time = timestamp;
-
-    if (count++ < 100) {
-        animationFrame(loop);
-    } else {
-        log.innerHTML = ary.join('<br>');
-    }
+for (var i = 0, val; val = elms[i]; ++i) {
+    val.addEventListener('click', function() {
+        // console.log(this.dataset.value)
+        socket.emit('request-enemy', this.dataset.value);
+    });
 }
-animationFrame(loop);
-</script>
+function setAutoEnemy(bool) {
+    socket.emit('auto-enemy', bool);
+}
+    </script>
 </body>
 
 </html>

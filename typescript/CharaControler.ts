@@ -49,30 +49,15 @@ class CharaControler {
         return false;
     }
     setInputHandeler(player: Player, socket, touchKeyboard: HTMLElement) {
-        if (socket) {
-            socket.emit('add', {
-                position: player.position
-            });
-        }
+        player.emit();
+
         let inputStart = (e: number | KeyboardEvent | TouchEvent) => {
             let keyCode = this.getKeyCode(e);
 
             this.inputStart(keyCode);
 
-            if (socket) {
-                socket.emit('inputStart', {
-                    keyCode: keyCode,
-                    // id: socket.id, // サーバー側で追加
-                    position: {
-                        position: {
-                            x: player.position.x | 0,
-                            y: player.position.y | 0,
-                            sx: (player.position.sx * 100 | 0) / 100,
-                            sy: (player.position.sy * 100 | 0) / 100
-                        }
-                    }
-                });
-            }
+            player.emit('inputStart', {keyCode: keyCode});
+
             // if ((<HTMLElement>e.target).classList) {
             //     (<HTMLElement>e.target).classList.add('js-hover');
             // }
@@ -82,17 +67,8 @@ class CharaControler {
 
             this.inputEnd(keyCode);
 
-            if (socket) {
-                socket.emit('inputEnd', {
-                    keyCode: keyCode,
-                    position: {
-                        x: player.position.x | 0,
-                        y: player.position.y | 0,
-                        sx: (player.position.sx * 100 | 0) / 100,
-                        sy: (player.position.sy * 100 | 0) / 100
-                    }
-                });
-            }
+            player.emit('inputEnd', {keyCode: keyCode});
+            
             // if ((<HTMLElement>e.target).classList) {
             //     (<HTMLElement>e.target).classList.remove('js-hover');
             // }
@@ -154,7 +130,7 @@ class CharaControler {
         window.addEventListener('blur', inputReset)
         if (touchKeyboard) {
             touchKeyboard.style.display = null;
-            
+
             if ('ontouchstart' in window) {
                 touchKeyboard.addEventListener('touchstart', touchInputStart, false);
                 touchKeyboard.addEventListener('touchmove', touchInputMove, false);

@@ -1,8 +1,9 @@
 /// <reference path="Chara.ts" />
 
-class Player extends Chara {
-    point = 0;
-    maxPoint = 0;
+class _Player extends Chara {
+    // life = 4;
+    teamNumber: number;
+    charaNumber: number;
     isFly: boolean;
 
     move() {
@@ -30,16 +31,6 @@ class Player extends Chara {
         this.move();
         this.setPosition();
         this.updateSprite();
-    }
-    display() {
-        let ctx = this.screen.ctx;
-
-        super.display();
-        ctx.font = '50px "8x8", sans-serif';
-        ctx.textAlign = 'right';
-        ctx.fillText(this.point.toFixed(0), 500 - 10, 50);
-        ctx.font = '25px "8x8", sans-serif';
-        ctx.fillText('MAX: ' + Math.max(this.maxPoint, this.point), 500 - 200, 40);
     }
     setPosition(target = this.position) {
         target.x += target.sx;
@@ -72,5 +63,65 @@ class Player extends Chara {
         else if (this.screen.frame % 20 === 0) {
             this.spriteIndex = this.spriteIndex ? 0 : 1;
         }
+    }
+}
+
+
+class Player extends _Player {
+    point = 0;
+    life = 999;
+    display() {
+        super.display();
+        
+        let ctx = this.screen.ctx;
+
+        ctx.font = '40px "8x8", sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('Point:', 500 - 270, 50);
+        ctx.fillText('LIFE:', 20, 50);
+
+        ctx.font = '50px "8x8", sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText('' + this.point, 480, 50);
+        ctx.fillText('' + this.life, 200, 50);
+    }
+    dead() {
+        this.position = {
+            x: 0,
+            y: 0,
+            sx: 0,
+            sy: 0
+        };
+        this.isFly = true;
+
+        // player.point = 0;
+        --this.life;
+
+        if (this.life < 0) {
+            this.life = 5;
+            this.point = 0;
+        }
+
+        this.emit();
+    }
+    emit(type = 'update', data?: Object) {
+        if (!socket) return;
+        
+        let sendData = {
+            team: this.teamNumber,
+            chara: this.charaNumber,
+            position: {
+                x: this.position.x | 0,
+                y: this.position.y | 0,
+                sx: (this.position.sx * 100 | 0) / 100,
+                sy: (this.position.sy * 100 | 0) / 100
+            }
+        }
+
+        for (let key in data) {
+            sendData[key] = data[key];
+        }
+
+        socket.emit(type, sendData);
     }
 }

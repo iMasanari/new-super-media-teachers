@@ -87,21 +87,22 @@ gameOption.addEventListener('touchend', function (e) { e.stopPropagation(); }, t
 
 document.getElementById('play').addEventListener('click', function () {
     let charaNumber = getCheckedRadio('chara'),
-        teamrNumber = getCheckedRadio('team');
-    
-    if (charaNumber == null || teamrNumber == null) {
+        teamNumber = +getCheckedRadio('team');
+
+    if (charaNumber == null || teamNumber == null) {
         return;
     }
-    
+
     player.sprites = sprites.teacher[charaNumber];
+    player.teamNumber = teamNumber
     isPlay = true;
     player.control.setInputHandeler(player, socket, document.getElementById('touch-keyboard'));
-    
+
     gameOption.style.display = 'none';
     enemys.list = [];
 }, false);
 
-function getCheckedRadio(name: string | NodeListOf<HTMLInputElement>) {
+function getCheckedRadio(name: string | NodeListOf<HTMLInputElement>): string {
     let nodelist = (typeof name === 'string') ?
         <NodeListOf<HTMLInputElement>>document.getElementsByName(name) : name;
 
@@ -148,24 +149,26 @@ function setSocketEvent() {
         otherPlayers.getPlayer(data.id).sync(data.position);
     });
     socket.on('inputStart', function (data: socketData) {
-        let chara = otherPlayers.getPlayer(data.id);
+        let otherPlayer = otherPlayers.getPlayer(data.id);
 
-        chara.control.inputStart(data.keyCode);
-        chara.sync(data.position);
+        otherPlayer.control.inputStart(data.keyCode);
+        otherPlayer.sync(data.position);
     });
     socket.on('inputEnd', function (data: socketData) {
-        let chara = otherPlayers.getPlayer(data.id);
+        let otherPlayer = otherPlayers.getPlayer(data.id);
 
-        chara.control.inputEnd(data.keyCode);
-        chara.sync(data.position);
+        otherPlayer.control.inputEnd(data.keyCode);
+        otherPlayer.sync(data.position);
     });
     socket.on('addEnemy', function (name) {
         enemys.add(name);
     });
     socket.on('request-update', function (data?: socketData) {
-        socket.emit('update', {
-            position: player.position
-        });
+        if (isPlay) {
+            socket.emit('update', {
+                position: player.position
+            });
+        }
 
         if (data) {
             otherPlayers.getPlayer(data.id).sync(data.position);

@@ -132,42 +132,16 @@ var CharaControler = (function () {
     };
     CharaControler.prototype.setInputHandeler = function (player, socket, touchKeyboard) {
         var _this = this;
-        if (socket) {
-            socket.emit('add', {
-                position: player.position
-            });
-        }
+        player.emit();
         var inputStart = function (e) {
             var keyCode = _this.getKeyCode(e);
             _this.inputStart(keyCode);
-            if (socket) {
-                socket.emit('inputStart', {
-                    keyCode: keyCode,
-                    position: {
-                        position: {
-                            x: player.position.x | 0,
-                            y: player.position.y | 0,
-                            sx: (player.position.sx * 100 | 0) / 100,
-                            sy: (player.position.sy * 100 | 0) / 100
-                        }
-                    }
-                });
-            }
+            player.emit('inputStart', { keyCode: keyCode });
         };
         var inputEnd = function (e) {
             var keyCode = _this.getKeyCode(e);
             _this.inputEnd(keyCode);
-            if (socket) {
-                socket.emit('inputEnd', {
-                    keyCode: keyCode,
-                    position: {
-                        x: player.position.x | 0,
-                        y: player.position.y | 0,
-                        sx: (player.position.sx * 100 | 0) / 100,
-                        sy: (player.position.sy * 100 | 0) / 100
-                    }
-                });
-            }
+            player.emit('inputEnd', { keyCode: keyCode });
         };
         var inputReset = function () {
             _this.down = {};
@@ -257,14 +231,12 @@ var Chara = (function () {
     ;
     return Chara;
 }());
-var Player = (function (_super) {
-    __extends(Player, _super);
-    function Player() {
+var _Player = (function (_super) {
+    __extends(_Player, _super);
+    function _Player() {
         _super.apply(this, arguments);
-        this.point = 0;
-        this.maxPoint = 0;
     }
-    Player.prototype.move = function () {
+    _Player.prototype.move = function () {
         if (this.control.isDown(37)) {
             this.position.sx -= this.isFly ? 0.1 : 0.4;
         }
@@ -286,21 +258,12 @@ var Player = (function (_super) {
             }
         }
     };
-    Player.prototype.update = function () {
+    _Player.prototype.update = function () {
         this.move();
         this.setPosition();
         this.updateSprite();
     };
-    Player.prototype.display = function () {
-        var ctx = this.screen.ctx;
-        _super.prototype.display.call(this);
-        ctx.font = '50px "8x8", sans-serif';
-        ctx.textAlign = 'right';
-        ctx.fillText(this.point.toFixed(0), 500 - 10, 50);
-        ctx.font = '25px "8x8", sans-serif';
-        ctx.fillText('MAX: ' + Math.max(this.maxPoint, this.point), 500 - 200, 40);
-    };
-    Player.prototype.setPosition = function (target) {
+    _Player.prototype.setPosition = function (target) {
         if (target === void 0) { target = this.position; }
         target.x += target.sx;
         target.sx = Math.min(Math.max(target.sx * (this.isFly ? 0.98 : 0.9), -4), 4);
@@ -322,7 +285,7 @@ var Player = (function (_super) {
             this.isFly = false;
         }
     };
-    Player.prototype.updateSprite = function () {
+    _Player.prototype.updateSprite = function () {
         if (this.isFly) {
             this.spriteIndex = 2;
         }
@@ -333,8 +296,63 @@ var Player = (function (_super) {
             this.spriteIndex = this.spriteIndex ? 0 : 1;
         }
     };
-    return Player;
+    return _Player;
 }(Chara));
+var Player = (function (_super) {
+    __extends(Player, _super);
+    function Player() {
+        _super.apply(this, arguments);
+        this.point = 0;
+        this.life = 999;
+    }
+    Player.prototype.display = function () {
+        _super.prototype.display.call(this);
+        var ctx = this.screen.ctx;
+        ctx.font = '40px "8x8", sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('Point:', 500 - 270, 50);
+        ctx.fillText('LIFE:', 20, 50);
+        ctx.font = '50px "8x8", sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText('' + this.point, 480, 50);
+        ctx.fillText('' + this.life, 200, 50);
+    };
+    Player.prototype.dead = function () {
+        this.position = {
+            x: 0,
+            y: 0,
+            sx: 0,
+            sy: 0
+        };
+        this.isFly = true;
+        --this.life;
+        if (this.life < 0) {
+            this.life = 5;
+            this.point = 0;
+        }
+        this.emit();
+    };
+    Player.prototype.emit = function (type, data) {
+        if (type === void 0) { type = 'update'; }
+        if (!socket)
+            return;
+        var sendData = {
+            team: this.teamNumber,
+            chara: this.charaNumber,
+            position: {
+                x: this.position.x | 0,
+                y: this.position.y | 0,
+                sx: (this.position.sx * 100 | 0) / 100,
+                sy: (this.position.sy * 100 | 0) / 100
+            }
+        };
+        for (var key in data) {
+            sendData[key] = data[key];
+        }
+        socket.emit(type, sendData);
+    };
+    return Player;
+}(_Player));
 var OtherPlayer = (function (_super) {
     __extends(OtherPlayer, _super);
     function OtherPlayer() {
@@ -379,8 +397,8 @@ var OtherPlayer = (function (_super) {
             }
             else {
                 this.isFly = true;
-                this._position.sy = -10;
-                this.position.sy = -10;
+                this._position.sy = -9;
+                this.position.sy = -9;
             }
         }
     };
@@ -390,7 +408,7 @@ var OtherPlayer = (function (_super) {
         }
     };
     return OtherPlayer;
-}(Player));
+}(_Player));
 var OtherPlayerBuilder = (function () {
     function OtherPlayerBuilder(sprites, screen) {
         this.sprites = sprites;
@@ -441,12 +459,15 @@ var Enemy = (function (_super) {
         this.position.x -= this.speed;
     };
     Enemy.prototype.pointCheck = function () {
-        var _this = this;
         if (!isPlay)
             return;
         if (!this.isAddedPoint) {
             if (player.position.x > this.position.x) {
                 var point = this.point * (1 + player.position.x / player.screenLeft) | 0;
+                socket.emit('addPoint', {
+                    team: player.teamNumber,
+                    point: point
+                });
                 player.point += point;
                 this.isAddedPoint = true;
                 this.pointPosition = {
@@ -455,9 +476,6 @@ var Enemy = (function (_super) {
                     y: this.position.y - 20,
                     opacity: 130
                 };
-                window.setTimeout(function () {
-                    _this.pointPosition = null;
-                }, 1000);
             }
         }
         else if (this.pointPosition && this.pointPosition.opacity) {
@@ -508,21 +526,8 @@ var EnemyBuilder = (function () {
         for (var i = 0, enemy = void 0; enemy = this.list[i]; ++i) {
             enemy.update();
             if (enemy.isHit(player)) {
-                player.position = {
-                    x: 0,
-                    y: 0,
-                    sx: 0,
-                    sy: 0
-                };
-                player.maxPoint = Math.max(player.point, player.maxPoint);
-                player.point = 0;
-                player.isFly = true;
+                player.dead();
                 this.list = [];
-                if (socket) {
-                    socket.emit('add', {
-                        position: player.position
-                    });
-                }
                 break;
             }
             else if (enemy.isDead()) {
@@ -569,8 +574,7 @@ var Ae = (function (_super) {
     }
     Ae.prototype.move = function () {
         _super.prototype.move.call(this);
-        if (this.position.y >= this.screenBottom) {
-            this.position.y = this.screenBottom;
+        if (this.screenBottom <= this.position.y) {
             if (++this.count > 30) {
                 this.count = 0;
                 this.position.sy = -10;
@@ -580,6 +584,9 @@ var Ae = (function (_super) {
         else {
             this.position.sy += 0.2;
             this.position.y += this.position.sy;
+            if (this.screenBottom < this.position.y) {
+                this.position.y = this.screenBottom;
+            }
         }
     };
     return Ae;
@@ -660,11 +667,12 @@ gameOption.addEventListener('touchstert', function (e) { e.stopPropagation(); },
 gameOption.addEventListener('touchmove', function (e) { e.stopPropagation(); }, true);
 gameOption.addEventListener('touchend', function (e) { e.stopPropagation(); }, true);
 document.getElementById('play').addEventListener('click', function () {
-    var charaNumber = getCheckedRadio('chara'), teamrNumber = getCheckedRadio('team');
-    if (charaNumber == null || teamrNumber == null) {
+    var charaNumber = getCheckedRadio('chara'), teamNumber = +getCheckedRadio('team');
+    if (charaNumber == null || teamNumber == null) {
         return;
     }
     player.sprites = sprites.teacher[charaNumber];
+    player.teamNumber = teamNumber;
     isPlay = true;
     player.control.setInputHandeler(player, socket, document.getElementById('touch-keyboard'));
     gameOption.style.display = 'none';
@@ -711,22 +719,24 @@ function setSocketEvent() {
         otherPlayers.getPlayer(data.id).sync(data.position);
     });
     socket.on('inputStart', function (data) {
-        var chara = otherPlayers.getPlayer(data.id);
-        chara.control.inputStart(data.keyCode);
-        chara.sync(data.position);
+        var otherPlayer = otherPlayers.getPlayer(data.id);
+        otherPlayer.control.inputStart(data.keyCode);
+        otherPlayer.sync(data.position);
     });
     socket.on('inputEnd', function (data) {
-        var chara = otherPlayers.getPlayer(data.id);
-        chara.control.inputEnd(data.keyCode);
-        chara.sync(data.position);
+        var otherPlayer = otherPlayers.getPlayer(data.id);
+        otherPlayer.control.inputEnd(data.keyCode);
+        otherPlayer.sync(data.position);
     });
     socket.on('addEnemy', function (name) {
         enemys.add(name);
     });
     socket.on('request-update', function (data) {
-        socket.emit('update', {
-            position: player.position
-        });
+        if (isPlay) {
+            socket.emit('update', {
+                position: player.position
+            });
+        }
         if (data) {
             otherPlayers.getPlayer(data.id).sync(data.position);
         }

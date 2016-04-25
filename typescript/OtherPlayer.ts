@@ -1,6 +1,6 @@
 /// <reference path="Player.ts" />
 
-class OtherPlayer extends Player {
+class OtherPlayer extends _Player {
     private _position: Chara.Position = {
         x: 0,
         y: 0,
@@ -43,8 +43,8 @@ class OtherPlayer extends Player {
                 this._position.sy -= 0.1;
             } else {
                 this.isFly = true;
-                this._position.sy = -10;
-                this.position.sy = -10;
+                this._position.sy = -9;
+                this.position.sy = -9;
             }
         }
     }
