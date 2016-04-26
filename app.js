@@ -7,6 +7,9 @@ var mime = require('mime'),
     app = require('http').createServer(function (req, res) {
         var url = 'app' + req.url.replace(/\/$/, '/index.html');
 
+        if (isGameStarted && url === 'app/index.html') {
+            url = 'app/watch.html';
+        }
         console.log('> ' + url);
 
         fs.readFile(url, function (err, data) {
@@ -29,6 +32,7 @@ console.log('Server running at http://localhost:' + port + '/');
 var io = require('socket.io').listen(app);
 
 var autoEnemy = true;
+var isGameStarted = false;
 
 io.sockets.on('connection', function (socket) {
     socket.on('add', function (data) {
@@ -57,33 +61,36 @@ io.sockets.on('connection', function (socket) {
     socket.on('auto-enemy', function (bool) {
         autoEnemy = bool;
     });
+    socket.on('game-start', function (isStart) {
+        io.sockets.emit('game-start', isStart);
+        
+        isGameStarted = isStart;
+    });
+    socket.on('set-life', function (num) {
+        io.sockets.emit('set-life', num);
+    });
     socket.on('point', function (data) {
         io.to('test').emit('point', data);
         
+    });
+    socket.on('auto-enemy-list', function (list) {
+        autoEnemyList = list;
+        autoEnemyListLen = autoEnemyList.length;
     });
     socket.on('remove', remove);
     socket.on('disconnect', remove);
 
     function remove() {
-        io.sockets.emit('remove', socket.id);
+        io.to('test').emit('remove', socket.id);
     }
 });
 
-var enemyList = [
-    // 'Piyo',
-    'Ai',
-    'Ps',
-    'Ai',
-    'Ps',
-    'Pr',
-    'Ae',
-    // 'Usagi'
-],
-    enemyListLen = enemyList.length;
+var autoEnemyList = ['Ai', 'Ps', 'Pr', 'Ae'],
+    autoEnemyListLen = autoEnemyList.length;
 
 function addEnemy() {
-    if (autoEnemy) {
-        io.sockets.emit('addEnemy', enemyList[Math.random() * enemyListLen | 0]);
+    if (autoEnemyListLen) {
+        io.sockets.emit('addEnemy', autoEnemyList[Math.random() * autoEnemyListLen | 0]);
     }
 }
 

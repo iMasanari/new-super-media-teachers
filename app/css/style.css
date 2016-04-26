@@ -16,23 +16,26 @@ body {
 
 .game-wapper {
     position: relative;
+    width: 500px;
     height: 500px;
 }
 .canvas {
     position: absolute;
     top: 0;
     box-sizing: border-box;
-    width: 500px;
-    height: 500px;
-    border: 1px solid #ddd;
+    width: 100%;
+    height: 100%;
+    min-width: 100%;
+    min-height: 100%;
+    /*border: 1px solid #ddd;*/
 }
 .game-option {
     position: absolute;
     top: 0;
     z-index: 10;
     box-sizing: border-box;
-    width: 500px;
-    height: 500px;
+    width: 100%;
+    height: 100%;
     padding: 0 1em;
 }
 
@@ -60,14 +63,6 @@ body {
     vertical-align: middle;
 }
 
-#canvas:-webkit-full-screen {
-    position: static;
-    width: auto;
-    height: auto;
-    min-width: 100%;
-    min-height: 100%;
-}
-
 .list {
     list-style: none;
 }
@@ -75,6 +70,7 @@ body {
 .request-enemy {
     width: 60px;
     height: 104px;
+    margin-bottom: 10px;
     background: url("../img/adobe.png") no-repeat;
 }
 .request-enemy-ai {
@@ -90,6 +86,18 @@ body {
     background-position: 0 -324px;
 }
 
+.player-thmb {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 60px;
+    height: 104px;
+    border: 2px solid #000;
+    background: url("../img/mmddots.png") no-repeat #fff;
+    transform: scale(1.5);
+    transform-origin: top right;
+}
+
 .float-list {
     overflow: hidden;
     list-style: none;
@@ -98,4 +106,34 @@ body {
 .float-list > li {
     float: left;
     margin: 1em;
+}
+.js-point {
+    text-align: right;
+}
+.game-point {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 10;
+    box-sizing: border-box;
+    padding: 1em;
+}
+
+:-webkit-full-screen {
+    position: static;
+    width: auto;
+    height: auto;
+    min-width: 100%;
+    min-height: 100%;
+}
+.js-disabled {
+    color: #ddd;
+}
+.game-option-select {
+    position: relative;
+}
+
+.adobe-list {
+    padding: 0;
+    margin: 0 1em;
 }

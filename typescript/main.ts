@@ -33,26 +33,35 @@ imageLoad('img/mmddots.png', function () {
             new Sprite(this, 256, 108 * i, 60, 104),
             new Sprite(this, 320, 108 * i, 60, 104)
         ];
+        // sprites.teacher[0][i] = [
+        //     new Sprite(this, 0, 27 * i, 15, 26, 4),
+        //     new Sprite(this, 16, 27 * i, 15, 26, 4),
+        //     new Sprite(this, 32, 27 * i, 15, 26, 4)
+        // ];
+        // sprites.teacher[1][i] = [
+        //     new Sprite(this, 48, 27 * i, 15, 26, 4),
+        //     new Sprite(this, 64, 27 * i, 15, 26, 4),
+        //     new Sprite(this, 80, 27 * i, 15, 26, 4)
+        // ];
     }
-    
-    
 
     imageLoad('img/adobe.png', function () {
         sprites.ai = [
-            new Sprite(this, 0, 0, 60, 100),
-            new Sprite(this, 64, 0, 60, 100)
+            new Sprite(this, 0, 0, 60, 104, 1.4),
+            new Sprite(this, 64, 0, 60, 104, 1.4)
         ];
         sprites.ps = [
-            new Sprite(this, 0, 108, 60, 100),
-            new Sprite(this, 64, 108, 60, 100)
+            new Sprite(this, 0, 108, 60, 104),
+            new Sprite(this, 64, 108, 60, 104)
         ];
         sprites.pr = [
-            new Sprite(this, 0, 216, 60, 100),
-            new Sprite(this, 64, 216, 60, 100)
+            new Sprite(this, 0, 216, 60, 104),
+            new Sprite(this, 64, 216, 60, 104)
         ];
         sprites.ae = [
-            new Sprite(this, 0, 324, 60, 100),
-            new Sprite(this, 64, 324, 60, 100)
+            new Sprite(this, 0, 324, 60, 104),
+            new Sprite(this, 64, 324, 60, 104),
+            new Sprite(this, 128, 324, 60, 104)
         ];
 
         init();
@@ -81,32 +90,74 @@ function init() {
     enemys = new EnemyBuilder(display);
 
     setSocketEvent();
-    document.getElementById('play').removeAttribute('disabled');
+
+    let playInput = document.getElementById('play');
+
+    if (playInput) {
+        playInput.textContent = 'スタート！'
+        playInput.classList.remove('js-disabled');
+    }
 }
 
 let gameOption = document.getElementById('game-option');
 
-gameOption.addEventListener('touchstert', function (e) { e.stopPropagation(); }, true);
-gameOption.addEventListener('touchmove', function (e) { e.stopPropagation(); }, true);
-gameOption.addEventListener('touchend', function (e) { e.stopPropagation(); }, true);
+if (gameOption) {
+    gameOption.addEventListener('touchstert', function (e) { e.stopPropagation(); }, true);
+    gameOption.addEventListener('touchmove', function (e) { e.stopPropagation(); }, true);
+    gameOption.addEventListener('touchend', function (e) { e.stopPropagation(); }, true);
 
-document.getElementById('play').addEventListener('click', function () {
-    let charaNumber = +getCheckedRadio('chara'),
-        teamNumber = +getCheckedRadio('team');
+    let charaInputs = <NodeListOf<HTMLInputElement>>document.getElementsByName('chara');
+    let teamInputs = <NodeListOf<HTMLInputElement>>document.getElementsByName('team');
+    let playInput = document.getElementById('play');
 
-    if (charaNumber == null || teamNumber == null) {
-        return;
-    }
+    let thmb = document.getElementById('player-thmb');
 
-    player.sprites = sprites.teacher[charaNumber][teamNumber];
-    player.teamNumber = teamNumber;
-    player.charaNumber = charaNumber;
-    isPlay = true;
-    player.control.setInputHandeler(player, socket, document.getElementById('touch-keyboard'));
+    let onclick = () => {
+        let charaNumber = getCheckedRadio(charaInputs),
+            teamNumber = getCheckedRadio(teamInputs);
 
-    gameOption.style.display = 'none';
-    enemys.list = [];
-}, false);
+        thmb.style.backgroundPosition =
+            `${+charaNumber ? -192 : 0}px ${-108 * +teamNumber}px`;
+
+        if (charaNumber != null && teamNumber != null) {
+            playInput.style.display = null;
+        }
+    };
+
+    [].forEach.call(charaInputs, val => {
+        val.addEventListener('change', onclick)
+    });
+    [].forEach.call(teamInputs, val => {
+        val.addEventListener('change', onclick)
+    });
+
+
+    playInput.addEventListener('click', function () {
+        let charaNumber = getCheckedRadio(charaInputs),
+            teamNumber = getCheckedRadio(teamInputs);
+
+        if (
+            charaNumber == null ||
+            teamNumber == null ||
+            playInput.classList.contains('js-disabled') ||
+            !window.confirm('ゲームを開始します。よろしいですか')
+        ) {
+            return;
+        }
+
+        player.sprites = sprites.teacher[charaNumber][teamNumber];
+
+        player.teamNumber = +teamNumber;
+        player.charaNumber = +charaNumber;
+
+        isPlay = true;
+        player.control.setInputHandeler(player, socket, document.getElementById('touch-keyboard'));
+
+        gameOption.style.display = 'none';
+        enemys.list = [];
+    }, false);
+}
+
 
 function getCheckedRadio(name: string | NodeListOf<HTMLInputElement>): string {
     let nodelist = (typeof name === 'string') ?
@@ -131,6 +182,9 @@ function update() {
     }
     enemys.update(player);
 }
+
+var pointUpdate;
+
 function render() {
     // 地面の描写
     let ctx = display.ctx,
@@ -141,6 +195,10 @@ function render() {
     ctx.moveTo(0, y);
     ctx.lineTo(display.width, y);
     ctx.stroke();
+
+    if (pointUpdate) {
+        pointUpdate();
+    }
 
     if (isPlay) {
         player.display();
@@ -178,6 +236,17 @@ function setSocketEvent() {
 
         if (data) {
             otherPlayers.getPlayer(data.id, data).sync(data.position);
+        }
+    });
+    socket.on('game-start', function (data?: socketData) {
+        if (isPlay && player) {
+            player.life = 2;
+            player.point = 0;
+        }
+    });
+    socket.on('set-life', function (num: number) {
+        if (isPlay && player) {
+            player.life = num;
         }
     });
     socket.on('remove', function (id: string) {

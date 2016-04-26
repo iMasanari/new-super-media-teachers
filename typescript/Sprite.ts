@@ -4,6 +4,7 @@ class Sprite {
         public x: number,
         public y: number,
         public width: number,
-        public height: number
+        public height: number,
+        public size = 1
     ) { }
 }

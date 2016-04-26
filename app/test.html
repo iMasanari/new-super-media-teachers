@@ -13,126 +13,162 @@
 </head>
 
 <body>
-    <div class="game-wapper">
-        <canvas id="canvas" class="canvas"></canvas>
-        <div id="game-option" class="game-option" style="display: none;">
-            <div id="html-top">
-                <h1>
-                    New SUPER<br>
-                    MEDHIA TEACHERS
-                </h1>
-                <!--<p class="button">タップしてスタート</p>-->
-            </div>
-            <div id="html-team-select">
-                <p>じぶんのチームと、つかう<br>キャラクターをえらんでください</p>
-                <ul class="list">
-                    <li>
-                        <label>
-                    <input type="radio" name="team" value="0">あかいろ
-                </label>
-                    </li>
-                    <li>
-                        <label>
-                    <input type="radio" name="team" value="1">あおいろ
-                </label>
-                    </li>
-                    <li>
-                        <label>
-                    <input type="radio" name="team" value="2">みどりいろ
-                </label>
-                    </li>
-                    <li>
-                        <label>
-                    <input type="radio" name="team" value="3">きいろ
-                </label>
-                    </li>
-                    <li>
-                        <label>
-                    <input type="radio" name="team" value="4">しろいろ
-                </label>
-                    </li>
-                    <li>
-                        <label>
-                    <input type="radio" name="team" value="5">くろいろ
-                </label>
-                    </li>
-                </ul>
-                <!--<div class="button disabled">けってい</div>-->
-            </div>
-            <div>
-                <!--<p>つかうキャラクターをえらんでください</p>-->
-                <ul class="list">
-                    <li>
-                        <label>
-                    <input type="radio" name="chara" value="0">つだ さん
-                </label>
-                    </li>
-                    <li>
-                        <label>
-                    <input type="radio" name="chara" value="1">たけうち さん
-                </label>
-                    </li>
-                </ul>
-                <div class="button" disabled="disabled" id="play">けってい</div>
-            </div>
+    <div class="float-wapper">
+        <div class="game-wapper">
+            <canvas id="canvas" class="canvas"></canvas>
         </div>
-    </div>
-    <div id="touch-keyboard" class="touch-keyboard" style="display: none;">
-        <span class="button keypad">Left &lt; - &gt; Right</span>
-        <span class="button jump">Jump</span>
-    </div>
-    <p>
+        <div id="touch-keyboard" class="touch-keyboard" style="display: none;">
+            <span class="button keypad">Left &lt; - &gt; Right</span>
+            <span class="button jump">Jump</span>
+        </div>
+        <ul class="float-list adobe-list">
+            <li>
+                <div class="request-enemy request-enemy-ai" data-value="Ai"></div>
+                <label>
+                <input type="checkbox" data-value="Ai" class="js-auto-enemy">Auto
+            </label>
+            </li>
+            <li>
+                <div class="request-enemy request-enemy-ps" data-value="Ps"></div>
+                <label>
+                <input type="checkbox" data-value="Ps" class="js-auto-enemy">Auto
+            </label>
+            </li>
+            <li>
+                <div class="request-enemy request-enemy-pr" data-value="Pr"></div>
+                <label>
+                <input type="checkbox" data-value="Pr" class="js-auto-enemy">Auto
+            </label>
+            </li>
+            <li>
+                <div class="request-enemy request-enemy-ae" data-value="Ae"></div>
+                <label>
+                <input type="checkbox" data-value="Ae" class="js-auto-enemy">Auto
+            </label>
+            </li>
+        </ul>
         <span class="button" id="fullscreen">Fullscreen (pc only)</span>
-    </p>
-    <ul class="float-list">
-        <li class="request-enemy request-enemy-ai" data-value="Ai"></li>
-        <li class="request-enemy request-enemy-ps" data-value="Ps"></li>
-        <li class="request-enemy request-enemy-pr" data-value="Pr"></li>
-        <li class="request-enemy request-enemy-ae" data-value="Ae"></li>
-    </ul>
+        <span class="button" id="game-start" class="">Game Start!</span>
+        <span class="button" id="game-sudden-death" class="">Sudden Death!</span>
+    </div>
 
     <!-- scripts -->
     <script src="socket.io/socket.io.js"></script>
     <script src="js/main.js"></script>
     <script>
-var elms = document.getElementsByClassName('request-enemy');
+        var elms = document.getElementsByClassName('request-enemy');
 
 for (var i = 0, val; val = elms[i]; ++i) {
     val.addEventListener('click', function() {
         socket.emit('request-enemy', this.dataset.value);
     });
 }
-function setAutoEnemy(bool) {
-    socket.emit('auto-enemy', bool);
-}
+
+var isStarted = false;
+
+document.getElementById('game-start').addEventListener('click', function() {
+    if (!isStarted && !window.confirm('ゲームを開始しますか')) return;
+
+    socket.emit('game-start', isStarted = !isStarted);
+});
+
+document.getElementById('game-sudden-death').addEventListener('click', function() {
+    if (!window.confirm('ライフを1にしますか')) return;
+    
+    socket.emit('set-life', 1);
+});
+
+
+socket.on('game-start', function (data) {
+    for (var i = 0, val; val = pointList[i]; ++i) {
+        val.point = 0;
+        val.playerNum = 0;
+    }
+});
 
 socket.emit('join', 'test');
 
 var pointList = [{
-    name: 'あかいろ',
+    name: 'あか',
+    playerNum: 0,
     point: 0
 }, {
-    name: 'あおいろ',
+    name: 'あお',
+    playerNum: 0,
     point: 0
 }, {
-    name: 'みどりいろ',
+    name: 'みどり',
+    playerNum: 0,
     point: 0
 }, {
-    name: 'きいろ',
+    name: 'き',
+    playerNum: 0,
     point: 0
 }, {
-    name: 'しろいろ',
+    name: 'しろ',
+    playerNum: 0,
     point: 0
 }, {
-    name: 'くろいろ',
+    name: 'くろ',
+    playerNum: 0,
     point: 0
 }];
 
 socket.on('point', function(data) {
     pointList[data.team].point += data.point;
-    console.log(pointList[data.team]);
 });
 
+var pointUpdate = function() {
+    var ctx = display.ctx;
+    ctx.font = '20px "8x8", sans-serif';
+    
+    ctx.fillStyle = '#000';
+    ctx.fillRect(250, 10, 240, 148);
+    ctx.strokeStyle = '#fff';
+    ctx.strokeRect(252, 12, 236, 148 - 4);
+    
+    ctx.fillStyle = '#fff';
+
+    for (var i = 0, val; val = pointList[i]; ++i) {
+        var height = 22 * i + 35;
+        ctx.textAlign = 'left';
+        ctx.fillText(val.name, 260, height);
+        ctx.textAlign = 'right';
+        ctx.fillText('x ' + val.playerNum, 360, height);
+        ctx.fillText(val.point + ' pt', 480, height);
+    }
+    ctx.strokeStyle = '#000';
+    ctx.fillStyle = '#000';
+}
+
+function teamNumCheck() {
+    if (otherPlayers) {
+        for (var i = 0, val; val = pointList[i]; ++i) {
+            val.playerNum = 0;
+        }
+        for (var key in otherPlayers.list) {
+            ++pointList[otherPlayers.list[key].teamNumber].playerNum;
+        }
+    }
+    window.setTimeout(teamNumCheck, 5000);
+}
+teamNumCheck();
+
+var autoEnemyElms = [].slice.call(document.getElementsByClassName('js-auto-enemy'));
+
+var autoEnemyElmsOnchange = function() {
+    var list = [];
+    for (var i = 0, val; val = autoEnemyElms[i]; ++i) {
+        if (val.checked) {
+            list.push(val.dataset.value);
+        }
+    }
+    socket.emit('auto-enemy-list', list);
+}
+
+for (var i = 0, val; val = autoEnemyElms[i]; ++i) {
+    val.addEventListener('change', autoEnemyElmsOnchange)
+}
     </script>
 </body>
 

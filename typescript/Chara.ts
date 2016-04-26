@@ -20,8 +20,8 @@ class Chara {
     r: number;
 
     constructor(public sprites: Sprite[], public screen: Game) {
-        this.width = sprites[0].width;
-        this.height = sprites[0].height;
+        this.width = sprites[0].width * sprites[0].size;
+        this.height = sprites[0].height * sprites[0].size;
         this.screenLeft = screen.width - this.width;
         this.screenBottom = screen.height - this.height - 100;
         

@@ -4,12 +4,14 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var Sprite = (function () {
-    function Sprite(img, x, y, width, height) {
+    function Sprite(img, x, y, width, height, size) {
+        if (size === void 0) { size = 1; }
         this.img = img;
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
+        this.size = size;
     }
     return Sprite;
 }());
@@ -22,8 +24,6 @@ var Game = (function () {
         this.fps = 50;
         this.maxFrameSkip = 10;
         this.skipTicks = 1000 / this.fps;
-        this.width = width;
-        this.height = height;
         this.canvas.width = width;
         this.canvas.height = height;
         this.ctx = this.canvas.getContext("2d");
@@ -55,7 +55,7 @@ var Game = (function () {
         this.ctx.clearRect(0, 0, this.width, this.height);
     };
     Game.prototype.drawSprite = function (sprite, x, y) {
-        this.ctx.drawImage(sprite.img, sprite.x, sprite.y, sprite.width, sprite.height, x, y, sprite.width, sprite.height);
+        this.ctx.drawImage(sprite.img, sprite.x, sprite.y, sprite.width, sprite.height, x, y, sprite.width * sprite.size, sprite.height * sprite.size);
     };
     return Game;
 }());
@@ -218,8 +218,8 @@ var Chara = (function () {
             sx: 0,
             sy: 0
         };
-        this.width = sprites[0].width;
-        this.height = sprites[0].height;
+        this.width = sprites[0].width * sprites[0].size;
+        this.height = sprites[0].height * sprites[0].size;
         this.screenLeft = screen.width - this.width;
         this.screenBottom = screen.height - this.height - 100;
         this.r = Math.min(this.width, this.height) / 2 - 2;
@@ -303,7 +303,7 @@ var Player = (function (_super) {
     function Player() {
         _super.apply(this, arguments);
         this.point = 0;
-        this.life = 999;
+        this.life = 99;
     }
     Player.prototype.display = function () {
         _super.prototype.display.call(this);
@@ -327,14 +327,14 @@ var Player = (function (_super) {
         this.isFly = true;
         --this.life;
         if (this.life < 0) {
-            this.life = 5;
-            this.point = 0;
+            isPlay = false;
+            socket.emit('remove');
         }
         this.emit();
     };
     Player.prototype.emit = function (type, data) {
         if (type === void 0) { type = 'update'; }
-        if (!socket)
+        if (!socket || !isPlay)
             return;
         var sendData = {
             team: this.teamNumber,
@@ -419,33 +419,38 @@ var OtherPlayer = (function (_super) {
     };
     return OtherPlayer;
 }(_Player));
+var pointList;
 var OtherPlayerBuilder = (function () {
     function OtherPlayerBuilder(sprites, screen) {
         this.sprites = sprites;
         this.screen = screen;
-        this.players = {};
+        this.list = {};
     }
     OtherPlayerBuilder.prototype.getPlayer = function (id, createData) {
-        var chara = this.players[id];
+        var chara = this.list[id];
         if (!chara) {
-            chara = this.players[id] = new OtherPlayer(this.sprites, this.screen);
+            chara = this.list[id] = new OtherPlayer(this.sprites, this.screen);
             chara.sprites = sprites.teacher[createData.chara][createData.team];
-            console.log(createData.chara, createData.team);
+            chara.teamNumber = createData.team;
+            ++pointList[createData.team].playerNum;
         }
         return chara;
     };
     OtherPlayerBuilder.prototype.remove = function (id) {
-        this.players[id] = null;
-        delete this.players[id];
+        if (this.list[id]) {
+            --pointList[this.list[id].teamNumber].playerNum;
+        }
+        this.list[id] = null;
+        delete this.list[id];
     };
     OtherPlayerBuilder.prototype.update = function () {
-        for (var id in this.players) {
-            this.players[id].update();
+        for (var id in this.list) {
+            this.list[id].update();
         }
     };
     OtherPlayerBuilder.prototype.display = function () {
-        for (var id in this.players) {
-            this.players[id].display();
+        for (var id in this.list) {
+            this.list[id].display();
         }
     };
     return OtherPlayerBuilder;
@@ -563,6 +568,7 @@ var Ai = (function (_super) {
     __extends(Ai, _super);
     function Ai(screens) {
         _super.call(this, sprites.ai, screens);
+        this.speed = 3;
     }
     return Ai;
 }(Enemy));
@@ -578,6 +584,7 @@ var Ae = (function (_super) {
     function Ae(screens) {
         _super.call(this, sprites.ae, screens);
         this.speed = 1.5;
+        this.isFly = false;
         this.count = 0;
     }
     Ae.prototype.move = function () {
@@ -587,6 +594,7 @@ var Ae = (function (_super) {
                 this.count = 0;
                 this.position.sy = -10;
                 this.position.y += this.position.sy;
+                this.isFly = true;
             }
         }
         else {
@@ -594,7 +602,19 @@ var Ae = (function (_super) {
             this.position.y += this.position.sy;
             if (this.screenBottom < this.position.y) {
                 this.position.y = this.screenBottom;
+                this.isFly = false;
             }
+        }
+    };
+    Ae.prototype.updateSprite = function () {
+        if (this.isFly) {
+            this.spriteIndex = 2;
+        }
+        else if (this.spriteIndex === 2) {
+            this.spriteIndex = 0;
+        }
+        else if (this.screen.frame % 20 === 0) {
+            this.spriteIndex = this.spriteIndex ? 0 : 1;
         }
     };
     return Ae;
@@ -606,15 +626,6 @@ var Pr = (function (_super) {
         this.speed = 2;
     }
     return Pr;
-}(Enemy));
-var Piyo = (function (_super) {
-    __extends(Piyo, _super);
-    function Piyo(screens) {
-        _super.call(this, sprites.piyo, screens);
-        this.speed = 5;
-        this.point = 60;
-    }
-    return Piyo;
 }(Enemy));
 var display = new Game(document.getElementById('canvas'), 500, 500);
 var socket = io.connect();
@@ -638,20 +649,21 @@ imageLoad('img/mmddots.png', function () {
     }
     imageLoad('img/adobe.png', function () {
         sprites.ai = [
-            new Sprite(this, 0, 0, 60, 100),
-            new Sprite(this, 64, 0, 60, 100)
+            new Sprite(this, 0, 0, 60, 104, 1.4),
+            new Sprite(this, 64, 0, 60, 104, 1.4)
         ];
         sprites.ps = [
-            new Sprite(this, 0, 108, 60, 100),
-            new Sprite(this, 64, 108, 60, 100)
+            new Sprite(this, 0, 108, 60, 104),
+            new Sprite(this, 64, 108, 60, 104)
         ];
         sprites.pr = [
-            new Sprite(this, 0, 216, 60, 100),
-            new Sprite(this, 64, 216, 60, 100)
+            new Sprite(this, 0, 216, 60, 104),
+            new Sprite(this, 64, 216, 60, 104)
         ];
         sprites.ae = [
-            new Sprite(this, 0, 324, 60, 100),
-            new Sprite(this, 64, 324, 60, 100)
+            new Sprite(this, 0, 324, 60, 104),
+            new Sprite(this, 64, 324, 60, 104),
+            new Sprite(this, 128, 324, 60, 104)
         ];
         init();
         display.run();
@@ -672,25 +684,52 @@ function init() {
     otherPlayers = new OtherPlayerBuilder(sprites.teacher[0][0], display);
     enemys = new EnemyBuilder(display);
     setSocketEvent();
-    document.getElementById('play').removeAttribute('disabled');
+    var playInput = document.getElementById('play');
+    if (playInput) {
+        playInput.textContent = 'スタート！';
+        playInput.classList.remove('js-disabled');
+    }
 }
 var gameOption = document.getElementById('game-option');
-gameOption.addEventListener('touchstert', function (e) { e.stopPropagation(); }, true);
-gameOption.addEventListener('touchmove', function (e) { e.stopPropagation(); }, true);
-gameOption.addEventListener('touchend', function (e) { e.stopPropagation(); }, true);
-document.getElementById('play').addEventListener('click', function () {
-    var charaNumber = +getCheckedRadio('chara'), teamNumber = +getCheckedRadio('team');
-    if (charaNumber == null || teamNumber == null) {
-        return;
-    }
-    player.sprites = sprites.teacher[charaNumber][teamNumber];
-    player.teamNumber = teamNumber;
-    player.charaNumber = charaNumber;
-    isPlay = true;
-    player.control.setInputHandeler(player, socket, document.getElementById('touch-keyboard'));
-    gameOption.style.display = 'none';
-    enemys.list = [];
-}, false);
+if (gameOption) {
+    gameOption.addEventListener('touchstert', function (e) { e.stopPropagation(); }, true);
+    gameOption.addEventListener('touchmove', function (e) { e.stopPropagation(); }, true);
+    gameOption.addEventListener('touchend', function (e) { e.stopPropagation(); }, true);
+    var charaInputs_1 = document.getElementsByName('chara');
+    var teamInputs_1 = document.getElementsByName('team');
+    var playInput_1 = document.getElementById('play');
+    var thmb_1 = document.getElementById('player-thmb');
+    var onclick_1 = function () {
+        var charaNumber = getCheckedRadio(charaInputs_1), teamNumber = getCheckedRadio(teamInputs_1);
+        thmb_1.style.backgroundPosition =
+            (+charaNumber ? -192 : 0) + "px " + -108 * +teamNumber + "px";
+        if (charaNumber != null && teamNumber != null) {
+            playInput_1.style.display = null;
+        }
+    };
+    [].forEach.call(charaInputs_1, function (val) {
+        val.addEventListener('change', onclick_1);
+    });
+    [].forEach.call(teamInputs_1, function (val) {
+        val.addEventListener('change', onclick_1);
+    });
+    playInput_1.addEventListener('click', function () {
+        var charaNumber = getCheckedRadio(charaInputs_1), teamNumber = getCheckedRadio(teamInputs_1);
+        if (charaNumber == null ||
+            teamNumber == null ||
+            playInput_1.classList.contains('js-disabled') ||
+            !window.confirm('ゲームを開始します。よろしいですか')) {
+            return;
+        }
+        player.sprites = sprites.teacher[charaNumber][teamNumber];
+        player.teamNumber = +teamNumber;
+        player.charaNumber = +charaNumber;
+        isPlay = true;
+        player.control.setInputHandeler(player, socket, document.getElementById('touch-keyboard'));
+        gameOption.style.display = 'none';
+        enemys.list = [];
+    }, false);
+}
 function getCheckedRadio(name) {
     var nodelist = (typeof name === 'string') ?
         document.getElementsByName(name) : name;
@@ -712,6 +751,7 @@ function update() {
     }
     enemys.update(player);
 }
+var pointUpdate;
 function render() {
     var ctx = display.ctx, y = display.height - 100;
     ctx.lineWidth = 2;
@@ -719,6 +759,9 @@ function render() {
     ctx.moveTo(0, y);
     ctx.lineTo(display.width, y);
     ctx.stroke();
+    if (pointUpdate) {
+        pointUpdate();
+    }
     if (isPlay) {
         player.display();
     }
@@ -752,6 +795,17 @@ function setSocketEvent() {
         }
         if (data) {
             otherPlayers.getPlayer(data.id, data).sync(data.position);
+        }
+    });
+    socket.on('game-start', function (data) {
+        if (isPlay && player) {
+            player.life = 2;
+            player.point = 0;
+        }
+    });
+    socket.on('set-life', function (num) {
+        if (isPlay && player) {
+            player.life = num;
         }
     });
     socket.on('remove', function (id) {

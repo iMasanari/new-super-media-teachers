@@ -16,51 +16,44 @@
     <div class="game-wapper">
         <canvas id="canvas" class="canvas"></canvas>
         <div id="game-option" class="game-option" style="">
-            <div id="html-top">
-                <h1>
-                    New SUPER<br>
-                    MEDHIA TEACHERS
-                </h1>
-                <!--<p class="button">タップしてスタート</p>-->
-            </div>
-            <div id="html-team-select">
-                <p>じぶんのチームと、つかう<br>キャラクターをえらんでください</p>
+            <h1>
+                New SUPER<br>
+                MEDHIA TEACHERS
+            </h1>
+            <p>じぶんのチームと、つかう<br>キャラクターをえらんでください</p>
+            <div class="game-option-select">
                 <ul class="list">
                     <li>
                         <label>
-                    <input type="radio" name="team" value="0">あかいろ
+                    <input type="radio" name="team" value="0">あかいろ チーム
                 </label>
                     </li>
                     <li>
                         <label>
-                    <input type="radio" name="team" value="1">あおいろ
+                    <input type="radio" name="team" value="1">あおいろ チーム
                 </label>
                     </li>
                     <li>
                         <label>
-                    <input type="radio" name="team" value="2">みどりいろ
+                    <input type="radio" name="team" value="2">みどりいろ チーム
                 </label>
                     </li>
                     <li>
                         <label>
-                    <input type="radio" name="team" value="3">きいろ
+                    <input type="radio" name="team" value="3">きいろ チーム
                 </label>
                     </li>
                     <li>
                         <label>
-                    <input type="radio" name="team" value="4">しろいろ
+                    <input type="radio" name="team" value="4">しろいろ チーム
                 </label>
                     </li>
                     <li>
                         <label>
-                    <input type="radio" name="team" value="5">くろいろ
+                    <input type="radio" name="team" value="5">くろいろ チーム
                 </label>
                     </li>
                 </ul>
-                <!--<div class="button disabled">けってい</div>-->
-            </div>
-            <div>
-                <!--<p>つかうキャラクターをえらんでください</p>-->
                 <ul class="list">
                     <li>
                         <label>
@@ -73,8 +66,9 @@
                 </label>
                     </li>
                 </ul>
-                <div class="button" disabled="disabled" id="play">けってい</div>
+                <div id="player-thmb" class="player-thmb"></div>
             </div>
+            <div class="button" id="play" class="js-disabled" style="display: none;">Loading...</div>
         </div>
     </div>
     <div id="touch-keyboard" class="touch-keyboard" style="display: none;">

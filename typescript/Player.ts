@@ -56,11 +56,9 @@ class _Player extends Chara {
     updateSprite() {
         if (this.isFly) {
             this.spriteIndex = 2;
-        }
-        else if (this.spriteIndex === 2) {
+        } else if (this.spriteIndex === 2) {
             this.spriteIndex = 0;
-        }
-        else if (this.screen.frame % 20 === 0) {
+        } else if (this.screen.frame % 20 === 0) {
             this.spriteIndex = this.spriteIndex ? 0 : 1;
         }
     }
@@ -69,7 +67,7 @@ class _Player extends Chara {
 
 class Player extends _Player {
     point = 0;
-    life = 999;
+    life = 99;
     display() {
         super.display();
 
@@ -98,14 +96,14 @@ class Player extends _Player {
         --this.life;
 
         if (this.life < 0) {
-            this.life = 5;
-            this.point = 0;
+            isPlay = false;
+            socket.emit('remove');
         }
 
         this.emit();
     }
     emit(type = 'update', data?: Object) {
-        if (!socket) return;
+        if (!socket || !isPlay) return;
 
         let sendData = {
             team: this.teamNumber,

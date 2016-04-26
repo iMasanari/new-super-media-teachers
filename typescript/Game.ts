@@ -11,8 +11,6 @@ class Game {
     private nextGameTick: number;
 
     constructor(public canvas: HTMLCanvasElement, public width: number, public height: number) {
-        this.width = width;
-        this.height = height;
         this.canvas.width = width;
         this.canvas.height = height;
         this.ctx = this.canvas.getContext("2d");
@@ -51,7 +49,7 @@ class Game {
         this.ctx.drawImage(
             sprite.img,
             sprite.x, sprite.y, sprite.width, sprite.height,
-            x, y, sprite.width, sprite.height
+            x, y, sprite.width * sprite.size, sprite.height * sprite.size
         );
     }
 }

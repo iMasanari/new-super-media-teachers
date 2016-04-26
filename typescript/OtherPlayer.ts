@@ -54,34 +54,40 @@ class OtherPlayer extends _Player {
         }
     }
 }
-
+var pointList;
 class OtherPlayerBuilder {
-    players: { [x: string]: OtherPlayer } = {};
+    list: { [x: string]: OtherPlayer } = {};
 
     constructor(public sprites: Sprite[], public screen: Game) { }
 
     getPlayer(id: string, createData) {
-        let chara = this.players[id];
+        let chara = this.list[id];
 
         if (!chara) {
-            chara = this.players[id] = new OtherPlayer(this.sprites, this.screen);
+            chara = this.list[id] = new OtherPlayer(this.sprites, this.screen);
             chara.sprites = sprites.teacher[createData.chara][createData.team];
-            console.log(createData.chara, createData.team);
+            chara.teamNumber = createData.team;
+
+            ++pointList[createData.team].playerNum;
         }
         return chara;
     }
     remove(id: string) {
-        this.players[id] = null;
-        delete this.players[id];
+        if (this.list[id]) {
+            --pointList[this.list[id].teamNumber].playerNum;
+        }
+
+        this.list[id] = null;
+        delete this.list[id];
     }
     update() {
-        for (let id in this.players) {
-            this.players[id].update();
+        for (let id in this.list) {
+            this.list[id].update();
         }
     }
     display() {
-        for (let id in this.players) {
-            this.players[id].display();
+        for (let id in this.list) {
+            this.list[id].display();
         }
     }
 }
