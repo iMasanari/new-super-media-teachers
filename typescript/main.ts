@@ -33,16 +33,6 @@ imageLoad('img/mmddots.png', function () {
             new Sprite(this, 256, 108 * i, 60, 104),
             new Sprite(this, 320, 108 * i, 60, 104)
         ];
-        // sprites.teacher[0][i] = [
-        //     new Sprite(this, 0, 27 * i, 15, 26, 4),
-        //     new Sprite(this, 16, 27 * i, 15, 26, 4),
-        //     new Sprite(this, 32, 27 * i, 15, 26, 4)
-        // ];
-        // sprites.teacher[1][i] = [
-        //     new Sprite(this, 48, 27 * i, 15, 26, 4),
-        //     new Sprite(this, 64, 27 * i, 15, 26, 4),
-        //     new Sprite(this, 80, 27 * i, 15, 26, 4)
-        // ];
     }
 
     imageLoad('img/adobe.png', function () {
@@ -184,6 +174,9 @@ function update() {
 }
 
 var pointUpdate;
+var _isGameover: boolean;
+
+_isGameover = _isGameover || false;
 
 function render() {
     // 地面の描写
@@ -206,6 +199,14 @@ function render() {
         otherPlayers.display();
     }
     enemys.display();
+    
+    if (_isGameover) {
+        ctx.fillStyle = '#000';
+        ctx.textAlign = 'left';
+        
+        ctx.font = '100px "8x8", sans-serif';
+        ctx.fillText('Game Over!', 10, 250);
+    }
 }
 
 function setSocketEvent() {

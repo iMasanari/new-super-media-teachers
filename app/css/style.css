@@ -45,6 +45,7 @@ body {
 }
 
 .button {
+    display: block;
     padding: 1em;
     border: 1px solid #ddd;
     border-radius: 5px;
@@ -136,4 +137,11 @@ body {
 .adobe-list {
     padding: 0;
     margin: 0 1em;
+}
+
+.float-wapper {
+    overflow: hidden;
+}
+.float-wapper-content {
+    float: left;
 }

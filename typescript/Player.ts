@@ -64,24 +64,33 @@ class _Player extends Chara {
     }
 }
 
-
 class Player extends _Player {
     point = 0;
     life = 99;
+    
     display() {
         super.display();
 
         let ctx = this.screen.ctx;
 
-        ctx.font = '40px "8x8", sans-serif';
-        ctx.textAlign = 'left';
-        ctx.fillText('Point:', 500 - 270, 50);
-        ctx.fillText('LIFE:', 20, 50);
+        ctx.font = '30px "8x8", sans-serif';
 
-        ctx.font = '50px "8x8", sans-serif';
+        ctx.fillStyle = '#000';
+        ctx.fillRect(250, 10, 240, 90);
+        ctx.strokeStyle = '#fff';
+        ctx.strokeRect(252, 12, 236, 90 - 4);
+
+        ctx.fillStyle = '#fff';
+
+        ctx.textAlign = 'left';
+        ctx.fillText('Point', 260, 45);
+        ctx.fillText('のこり', 260, 85);
         ctx.textAlign = 'right';
-        ctx.fillText('' + this.point, 480, 50);
-        ctx.fillText('' + this.life, 200, 50);
+        ctx.fillText('' + this.point, 480, 45);
+        ctx.fillText('x ' + this.life, 480, 85);
+
+        ctx.strokeStyle = '#000';
+        ctx.fillStyle = '#000';
     }
     dead() {
         this.position = {
@@ -97,6 +106,9 @@ class Player extends _Player {
 
         if (this.life < 0) {
             isPlay = false;
+            _isGameover = true;
+            console.log(_isGameover)
+            
             socket.emit('remove');
         }
 
@@ -126,7 +138,7 @@ class Player extends _Player {
         if (!isPlay) return;
 
         this.point += point;
-        
+
         socket.emit('point', {
             team: this.teamNumber,
             chara: this.charaNumber,

@@ -308,14 +308,20 @@ var Player = (function (_super) {
     Player.prototype.display = function () {
         _super.prototype.display.call(this);
         var ctx = this.screen.ctx;
-        ctx.font = '40px "8x8", sans-serif';
+        ctx.font = '30px "8x8", sans-serif';
+        ctx.fillStyle = '#000';
+        ctx.fillRect(250, 10, 240, 90);
+        ctx.strokeStyle = '#fff';
+        ctx.strokeRect(252, 12, 236, 90 - 4);
+        ctx.fillStyle = '#fff';
         ctx.textAlign = 'left';
-        ctx.fillText('Point:', 500 - 270, 50);
-        ctx.fillText('LIFE:', 20, 50);
-        ctx.font = '50px "8x8", sans-serif';
+        ctx.fillText('Point', 260, 45);
+        ctx.fillText('のこり', 260, 85);
         ctx.textAlign = 'right';
-        ctx.fillText('' + this.point, 480, 50);
-        ctx.fillText('' + this.life, 200, 50);
+        ctx.fillText('' + this.point, 480, 45);
+        ctx.fillText('x ' + this.life, 480, 85);
+        ctx.strokeStyle = '#000';
+        ctx.fillStyle = '#000';
     };
     Player.prototype.dead = function () {
         this.position = {
@@ -328,6 +334,8 @@ var Player = (function (_super) {
         --this.life;
         if (this.life < 0) {
             isPlay = false;
+            _isGameover = true;
+            console.log(_isGameover);
             socket.emit('remove');
         }
         this.emit();
@@ -752,6 +760,8 @@ function update() {
     enemys.update(player);
 }
 var pointUpdate;
+var _isGameover;
+_isGameover = _isGameover || false;
 function render() {
     var ctx = display.ctx, y = display.height - 100;
     ctx.lineWidth = 2;
@@ -769,6 +779,12 @@ function render() {
         otherPlayers.display();
     }
     enemys.display();
+    if (_isGameover) {
+        ctx.fillStyle = '#000';
+        ctx.textAlign = 'left';
+        ctx.font = '100px "8x8", sans-serif';
+        ctx.fillText('Game Over!', 10, 250);
+    }
 }
 function setSocketEvent() {
     socket.on('update', function (data) {

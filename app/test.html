@@ -4,7 +4,7 @@
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta charset="utf-8">
-    <title>New SUPER MEDHIA TEACHERS</title>
+    <title>New SUPER MEDIA TEACHERS</title>
     <meta name="description" content="">
     <meta name="author" content="">
     <meta name="viewport" content="width=500,user-scalable=no">
@@ -14,42 +14,44 @@
 
 <body>
     <div class="float-wapper">
-        <div class="game-wapper">
+        <div class="game-wapper float-wapper-content">
             <canvas id="canvas" class="canvas"></canvas>
         </div>
         <div id="touch-keyboard" class="touch-keyboard" style="display: none;">
             <span class="button keypad">Left &lt; - &gt; Right</span>
             <span class="button jump">Jump</span>
         </div>
-        <ul class="float-list adobe-list">
-            <li>
-                <div class="request-enemy request-enemy-ai" data-value="Ai"></div>
-                <label>
+        <div class="float-wapper-content">
+            <ul class="float-list adobe-list">
+                <li>
+                    <div class="request-enemy request-enemy-ai" data-value="Ai"></div>
+                    <label>
                 <input type="checkbox" data-value="Ai" class="js-auto-enemy">Auto
             </label>
-            </li>
-            <li>
-                <div class="request-enemy request-enemy-ps" data-value="Ps"></div>
-                <label>
+                </li>
+                <li>
+                    <div class="request-enemy request-enemy-ps" data-value="Ps"></div>
+                    <label>
                 <input type="checkbox" data-value="Ps" class="js-auto-enemy">Auto
             </label>
-            </li>
-            <li>
-                <div class="request-enemy request-enemy-pr" data-value="Pr"></div>
-                <label>
+                </li>
+                <li>
+                    <div class="request-enemy request-enemy-pr" data-value="Pr"></div>
+                    <label>
                 <input type="checkbox" data-value="Pr" class="js-auto-enemy">Auto
             </label>
-            </li>
-            <li>
-                <div class="request-enemy request-enemy-ae" data-value="Ae"></div>
-                <label>
+                </li>
+                <li>
+                    <div class="request-enemy request-enemy-ae" data-value="Ae"></div>
+                    <label>
                 <input type="checkbox" data-value="Ae" class="js-auto-enemy">Auto
             </label>
-            </li>
-        </ul>
-        <span class="button" id="fullscreen">Fullscreen (pc only)</span>
-        <span class="button" id="game-start" class="">Game Start!</span>
-        <span class="button" id="game-sudden-death" class="">Sudden Death!</span>
+                </li>
+            </ul>
+            <span class="button" id="fullscreen">Fullscreen (pc only)</span>
+            <span class="button" id="game-start" class="">Game Start!</span>
+            <span class="button" id="game-sudden-death" class="">Sudden Death!</span>
+        </div>
     </div>
 
     <!-- scripts -->
@@ -73,9 +75,9 @@ document.getElementById('game-start').addEventListener('click', function() {
 });
 
 document.getElementById('game-sudden-death').addEventListener('click', function() {
-    if (!window.confirm('ライフを1にしますか')) return;
+    if (!window.confirm('残りライフを0にしますか')) return;
     
-    socket.emit('set-life', 1);
+    socket.emit('set-life', 0);
 });
 
 
