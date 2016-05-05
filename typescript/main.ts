@@ -15,13 +15,11 @@ let display = new Game(
 
 let socket = io.connect();
 
-let sprites: any = {
-    teacher: [
-        [], []
-    ]
-};
+let sprites: any = {};
 
 imageLoad('img/mmddots.png', function () {
+    sprites.teacher = [[], []];
+    
     for (let i = 0; i < 6; ++i) {
         sprites.teacher[0][i] = [
             new Sprite(this, 0, 108 * i, 60, 104),
@@ -241,13 +239,13 @@ function setSocketEvent() {
     });
     socket.on('game-start', function (data?: socketData) {
         if (isPlay && player) {
-            player.life = 2;
+            // player.life = 2;
             player.point = 0;
         }
     });
     socket.on('set-life', function (num: number) {
         if (isPlay && player) {
-            player.life = num;
+            // player.life = num;
         }
     });
     socket.on('remove', function (id: string) {
@@ -255,12 +253,7 @@ function setSocketEvent() {
     });
 }
 
-// iPhoneでスクロール中にアニメーションが止まるので、スクロールさせない等
-document.addEventListener('touchstert', function (e) { e.preventDefault(); });
-document.addEventListener('touchmove', function (e) { e.preventDefault(); });
-document.addEventListener('touchend', function (e) { e.preventDefault(); });
-
-function ElementRequestFullscreen(element) {
+function ElementRequestFullscreen(element: HTMLElement) {
     let list = [
         "requestFullscreen",
         "webkitRequestFullScreen",

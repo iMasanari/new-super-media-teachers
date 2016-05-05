@@ -42,7 +42,7 @@ class Enemy extends Chara {
                 this.pointPosition = {
                     point: point,
                     x: this.position.x + 30,
-                    y: this.position.y - 20,
+                    y: (this.position.y + player.position.y + player.height) / 2,
                     opacity: 130
                 };
 
@@ -50,7 +50,7 @@ class Enemy extends Chara {
         } else if (this.pointPosition && this.pointPosition.opacity) {
             let ctx = this.screen.ctx;
 
-            ctx.font = '30px "8x8", sans-serif';
+            ctx.font = '30px "8dot", sans-serif';
             ctx.textAlign = 'center';
             ctx.globalAlpha = this.pointPosition.opacity / 100;
 

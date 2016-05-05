@@ -17,19 +17,115 @@
         <canvas id="canvas" class="canvas"></canvas>
     </div>
     <div id="touch-keyboard" class="touch-keyboard" style="display: none;">
-        <!--<span class="button keypad">Left &lt; - &gt; Right</span>
-        <span class="button jump">Jump</span>-->
+        <span class="button keypad">Left &lt; - &gt; Right</span>
+        <span class="button jump">Jump</span>
     </div>
-    <p style="display: none;">
-        <span class="button" id="fullscreen">Fullscreen (pc only)</span>
-    </p>
+    <div>
+        <ul class="float-list adobe-list">
+            <li>
+                <div class="request-enemy request-enemy-ai" data-value="Ai"></div>
+            </li>
+            <li>
+                <div class="request-enemy request-enemy-ps" data-value="Ps"></div>
+            </li>
+            <li>
+                <div class="request-enemy request-enemy-pr" data-value="Pr"></div>
+            </li>
+            <li>
+                <div class="request-enemy request-enemy-ae" data-value="Ae"></div>
+            </li>
+        </ul>
+        <p>↑クリックで てきが でます<p>
+        <span class="button" id="fullscreen" style="width: 500px;">Fullscreen (pc only)</span>
+    </div>
 
     <!-- scripts -->
     <script src="socket.io/socket.io.js"></script>
-    <script>
-        var _isGameover = true;
-    </script>
     <script src="js/main.js"></script>
+    <script>
+        var elms = document.getElementsByClassName('request-enemy');
+
+for (var i = 0, val; val = elms[i]; ++i) {
+    val.addEventListener('click', function() {
+        socket.emit('request-enemy', this.dataset.value);
+    });
+}
+
+socket.on('game-start', function (data) {
+    for (var i = 0, val; val = pointList[i]; ++i) {
+        val.point = 0;
+        val.playerNum = 0;
+    }
+});
+
+socket.emit('join', 'test');
+
+var pointList = [{
+    name: 'あか',
+    playerNum: 0,
+    point: 0
+}, {
+    name: 'あお',
+    playerNum: 0,
+    point: 0
+}, {
+    name: 'みどり',
+    playerNum: 0,
+    point: 0
+}, {
+    name: 'き',
+    playerNum: 0,
+    point: 0
+}, {
+    name: 'しろ',
+    playerNum: 0,
+    point: 0
+}, {
+    name: 'くろ',
+    playerNum: 0,
+    point: 0
+}];
+
+socket.on('point', function(data) {
+    pointList[data.team].point += data.point;
+});
+
+var pointUpdate = function() {
+    var ctx = display.ctx;
+    ctx.font = '20px "8x8", sans-serif';
+    
+    ctx.fillStyle = '#000';
+    ctx.fillRect(250, 10, 240, 148);
+    ctx.strokeStyle = '#fff';
+    ctx.strokeRect(252, 12, 236, 148 - 4);
+    
+    ctx.fillStyle = '#fff';
+
+    for (var i = 0, val; val = pointList[i]; ++i) {
+        var height = 22 * i + 35;
+        ctx.textAlign = 'left';
+        ctx.fillText(val.name, 260, height);
+        ctx.textAlign = 'right';
+        ctx.fillText('x ' + val.playerNum, 360, height);
+        ctx.fillText(val.point + ' pt', 480, height);
+    }
+    ctx.strokeStyle = '#000';
+    ctx.fillStyle = '#000';
+}
+
+function teamNumCheck() {
+    if (otherPlayers) {
+        for (var i = 0, val; val = pointList[i]; ++i) {
+            val.playerNum = 0;
+        }
+        for (var key in otherPlayers.list) {
+            ++pointList[otherPlayers.list[key].teamNumber].playerNum;
+        }
+    }
+    window.setTimeout(teamNumCheck, 5000);
+}
+teamNumCheck();
+    </script>
 </body>
 
 </html>

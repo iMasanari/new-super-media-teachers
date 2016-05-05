@@ -24,30 +24,46 @@
             <div class="game-option-select">
                 <ul class="list">
                     <li>
-                        <label><input type="radio" name="team" value="0">あかいろ チーム</label>
+                        <label>
+                    <input type="radio" name="team" value="0">あかいろ チーム
+                </label>
                     </li>
                     <li>
-                        <label><input type="radio" name="team" value="1">あおいろ チーム</label>
+                        <label>
+                    <input type="radio" name="team" value="1">あおいろ チーム
+                </label>
                     </li>
                     <li>
-                        <label><input type="radio" name="team" value="2">みどりいろ チーム</label>
+                        <label>
+                    <input type="radio" name="team" value="2">みどりいろ チーム
+                </label>
                     </li>
                     <li>
-                        <label><input type="radio" name="team" value="3">きいろ チーム</label>
+                        <label>
+                    <input type="radio" name="team" value="3">きいろ チーム
+                </label>
                     </li>
                     <li>
-                        <label><input type="radio" name="team" value="4">しろいろ チーム</label>
+                        <label>
+                    <input type="radio" name="team" value="4">しろいろ チーム
+                </label>
                     </li>
                     <li>
-                        <label><input type="radio" name="team" value="5">くろいろ チーム</label>
+                        <label>
+                    <input type="radio" name="team" value="5">くろいろ チーム
+                </label>
                     </li>
                 </ul>
                 <ul class="list">
                     <li>
-                        <label><input type="radio" name="chara" value="0">つだ さん</label>
+                        <label>
+                    <input type="radio" name="chara" value="0">つだ さん
+                </label>
                     </li>
                     <li>
-                        <label><input type="radio" name="chara" value="1">たけうち さん</label>
+                        <label>
+                    <input type="radio" name="chara" value="1">たけうち さん
+                </label>
                     </li>
                 </ul>
                 <div id="player-thmb" class="player-thmb"></div>
@@ -67,14 +83,9 @@
     <script>
         
 // iPhoneでスクロール中にアニメーションが止まるので、スクロールさせない等
-
-var preventDefault = function(e) {
-    e.preventDefault();
-};
-
-document.addEventListener('touchstert', preventDefault);
-document.addEventListener('touchmove', preventDefault);
-document.addEventListener('touchend', preventDefault);
+document.addEventListener('touchstert', function (e) { e.preventDefault(); });
+document.addEventListener('touchmove', function (e) { e.preventDefault(); });
+document.addEventListener('touchend', function (e) { e.preventDefault(); });
 
 </script>
     <script src="socket.io/socket.io.js"></script>

@@ -1,5 +1,5 @@
 @font-face {
-    font-family: '8x8';
+    font-family: '8dot';
   src: url('8dot.woff') format('woff'),
        url('8dot.ttf') format('truetype');
 }
@@ -8,9 +8,8 @@ html,
 body {
     padding: 0;
     margin: 0;
+    font: 20px "8dot", sans-serif;
     -webkit-user-select: none;
-    font-family: '8x8';
-    font-size: 20px;
     /*user-select: none;*/
 }
 

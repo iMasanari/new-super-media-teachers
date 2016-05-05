@@ -303,25 +303,27 @@ var Player = (function (_super) {
     function Player() {
         _super.apply(this, arguments);
         this.point = 0;
-        this.life = 99;
+        this.maxPoint = 0;
+        this.prevPoint = 0;
     }
     Player.prototype.display = function () {
-        _super.prototype.display.call(this);
         var ctx = this.screen.ctx;
-        ctx.font = '30px "8x8", sans-serif';
+        ctx.font = '30px "8dot", sans-serif';
         ctx.fillStyle = '#000';
-        ctx.fillRect(250, 10, 240, 90);
+        ctx.fillRect(250, 10, 240, 130);
         ctx.strokeStyle = '#fff';
-        ctx.strokeRect(252, 12, 236, 90 - 4);
+        ctx.strokeRect(252, 12, 236, 130 - 4);
         ctx.fillStyle = '#fff';
         ctx.textAlign = 'left';
-        ctx.fillText('Point', 260, 45);
-        ctx.fillText('のこり', 260, 85);
+        ctx.fillText('Max:', 260, 85);
+        ctx.fillText('Prev:', 260, 125);
         ctx.textAlign = 'right';
-        ctx.fillText('' + this.point, 480, 45);
-        ctx.fillText('x ' + this.life, 480, 85);
+        ctx.fillText(this.maxPoint + ' pt', 480, 85);
+        ctx.fillText(this.prevPoint + ' pt', 480, 125);
+        ctx.fillText(this.point + ' pt', 480, 45);
         ctx.strokeStyle = '#000';
         ctx.fillStyle = '#000';
+        _super.prototype.display.call(this);
     };
     Player.prototype.dead = function () {
         this.position = {
@@ -331,13 +333,8 @@ var Player = (function (_super) {
             sy: 0
         };
         this.isFly = true;
-        --this.life;
-        if (this.life < 0) {
-            isPlay = false;
-            _isGameover = true;
-            console.log(_isGameover);
-            socket.emit('remove');
-        }
+        player.prevPoint = player.point;
+        player.point = 0;
         this.emit();
     };
     Player.prototype.emit = function (type, data) {
@@ -363,6 +360,7 @@ var Player = (function (_super) {
         if (!isPlay)
             return;
         this.point += point;
+        this.maxPoint = Math.max(this.maxPoint, this.point);
         socket.emit('point', {
             team: this.teamNumber,
             chara: this.charaNumber,
@@ -494,14 +492,14 @@ var Enemy = (function (_super) {
                 this.pointPosition = {
                     point: point,
                     x: this.position.x + 30,
-                    y: this.position.y - 20,
+                    y: (this.position.y + player.position.y + player.height) / 2,
                     opacity: 130
                 };
             }
         }
         else if (this.pointPosition && this.pointPosition.opacity) {
             var ctx = this.screen.ctx;
-            ctx.font = '30px "8x8", sans-serif';
+            ctx.font = '30px "8dot", sans-serif';
             ctx.textAlign = 'center';
             ctx.globalAlpha = this.pointPosition.opacity / 100;
             this.pointPosition.opacity -= 5;
@@ -637,12 +635,9 @@ var Pr = (function (_super) {
 }(Enemy));
 var display = new Game(document.getElementById('canvas'), 500, 500);
 var socket = io.connect();
-var sprites = {
-    teacher: [
-        [], []
-    ]
-};
+var sprites = {};
 imageLoad('img/mmddots.png', function () {
+    sprites.teacher = [[], []];
     for (var i = 0; i < 6; ++i) {
         sprites.teacher[0][i] = [
             new Sprite(this, 0, 108 * i, 60, 104),
@@ -815,22 +810,17 @@ function setSocketEvent() {
     });
     socket.on('game-start', function (data) {
         if (isPlay && player) {
-            player.life = 2;
             player.point = 0;
         }
     });
     socket.on('set-life', function (num) {
         if (isPlay && player) {
-            player.life = num;
         }
     });
     socket.on('remove', function (id) {
         otherPlayers.remove(id);
     });
 }
-document.addEventListener('touchstert', function (e) { e.preventDefault(); });
-document.addEventListener('touchmove', function (e) { e.preventDefault(); });
-document.addEventListener('touchend', function (e) { e.preventDefault(); });
 function ElementRequestFullscreen(element) {
     var list = [
         "requestFullscreen",

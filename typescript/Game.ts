@@ -13,7 +13,7 @@ class Game {
     constructor(public canvas: HTMLCanvasElement, public width: number, public height: number) {
         this.canvas.width = width;
         this.canvas.height = height;
-        this.ctx = this.canvas.getContext("2d");
+        this.ctx = this.canvas.getContext('2d');
     }
     run() {
         let loop = () => {

@@ -66,31 +66,36 @@ class _Player extends Chara {
 
 class Player extends _Player {
     point = 0;
-    life = 99;
+    maxPoint = 0;
+    prevPoint = 0;
     
     display() {
-        super.display();
-
         let ctx = this.screen.ctx;
 
-        ctx.font = '30px "8x8", sans-serif';
+        ctx.font = '30px "8dot", sans-serif';
 
         ctx.fillStyle = '#000';
-        ctx.fillRect(250, 10, 240, 90);
+        ctx.fillRect(250, 10, 240, 130);
         ctx.strokeStyle = '#fff';
-        ctx.strokeRect(252, 12, 236, 90 - 4);
+        ctx.strokeRect(252, 12, 236, 130 - 4);
 
         ctx.fillStyle = '#fff';
 
         ctx.textAlign = 'left';
-        ctx.fillText('Point', 260, 45);
-        ctx.fillText('のこり', 260, 85);
+        // ctx.fillText('Point', 260, 45);
+        ctx.fillText('Max:', 260, 85);
+        ctx.fillText('Prev:', 260, 125);
         ctx.textAlign = 'right';
-        ctx.fillText('' + this.point, 480, 45);
-        ctx.fillText('x ' + this.life, 480, 85);
+        ctx.fillText(this.maxPoint + ' pt', 480, 85);
+        ctx.fillText(this.prevPoint + ' pt', 480, 125);
+        
+        // ctx.font = '50px "8dot", sans-serif';
+        ctx.fillText(this.point + ' pt', 480, 45);
 
         ctx.strokeStyle = '#000';
         ctx.fillStyle = '#000';
+        
+        super.display();
     }
     dead() {
         this.position = {
@@ -101,16 +106,18 @@ class Player extends _Player {
         };
         this.isFly = true;
 
-        // player.point = 0;
-        --this.life;
+        player.prevPoint = player.point;
+        player.point = 0;
+        
+        // --this.life;
 
-        if (this.life < 0) {
-            isPlay = false;
-            _isGameover = true;
-            console.log(_isGameover)
+        // if (this.life < 0) {
+        //     isPlay = false;
+        //     _isGameover = true;
+        //     console.log(_isGameover)
             
-            socket.emit('remove');
-        }
+        //     socket.emit('remove');
+        // }
 
         this.emit();
     }
@@ -138,6 +145,7 @@ class Player extends _Player {
         if (!isPlay) return;
 
         this.point += point;
+        this.maxPoint = Math.max(this.maxPoint, this.point);
 
         socket.emit('point', {
             team: this.teamNumber,

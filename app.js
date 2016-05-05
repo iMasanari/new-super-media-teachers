@@ -31,7 +31,6 @@ console.log('Server running at http://localhost:' + port + '/');
 
 var io = require('socket.io').listen(app);
 
-var autoEnemy = true;
 var isGameStarted = false;
 
 io.sockets.on('connection', function (socket) {
@@ -57,9 +56,14 @@ io.sockets.on('connection', function (socket) {
     });
     socket.on('request-enemy', function (name) {
         io.sockets.emit('addEnemy', name);
-    });
-    socket.on('auto-enemy', function (bool) {
-        autoEnemy = bool;
+        
+        // 5秒間、敵の自動追加を止める
+        isAutoEnemyStop = true;
+        clearTimeout(autoEnemyStopTimerId);
+        
+        autoEnemyStopTimerId = setTimeout(function() {
+            isAutoEnemyStop = false;
+        }, 5000);
     });
     socket.on('game-start', function (isStart) {
         io.sockets.emit('game-start', isStart);
@@ -86,10 +90,12 @@ io.sockets.on('connection', function (socket) {
 });
 
 var autoEnemyList = ['Ai', 'Ps', 'Pr', 'Ae'],
-    autoEnemyListLen = autoEnemyList.length;
+    autoEnemyListLen = autoEnemyList.length,
+    isAutoEnemyStop = false,
+    autoEnemyStopTimerId;
 
 function addEnemy() {
-    if (autoEnemyListLen) {
+    if (autoEnemyListLen && !isAutoEnemyStop) {
         io.sockets.emit('addEnemy', autoEnemyList[Math.random() * autoEnemyListLen | 0]);
     }
 }
